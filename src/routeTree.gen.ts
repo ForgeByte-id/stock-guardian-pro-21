@@ -16,6 +16,7 @@ import { Route as AuthenticatedSimulationRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authenticated/movements.index'
 import { Route as AuthenticatedMovementsNewRouteImport } from './routes/_authenticated/movements.new'
+import { Route as AuthenticatedReturnsIdInspectRouteImport } from './routes/_authenticated/returns.$id.inspect'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -53,6 +54,12 @@ const AuthenticatedMovementsNewRoute =
     path: '/movements/new',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReturnsIdInspectRoute =
+  AuthenticatedReturnsIdInspectRouteImport.update({
+    id: '/returns/$id/inspect',
+    path: '/returns/$id/inspect',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/simulation': typeof AuthenticatedSimulationRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
   '/movements/': typeof AuthenticatedMovementsIndexRoute
+  '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,6 +77,7 @@ export interface FileRoutesByTo {
   '/simulation': typeof AuthenticatedSimulationRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
   '/movements': typeof AuthenticatedMovementsIndexRoute
+  '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,6 +88,7 @@ export interface FileRoutesById {
   '/_authenticated/simulation': typeof AuthenticatedSimulationRoute
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
   '/_authenticated/movements/': typeof AuthenticatedMovementsIndexRoute
+  '/_authenticated/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/simulation'
     | '/movements/new'
     | '/movements/'
+    | '/returns/$id/inspect'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/simulation'
     | '/movements/new'
     | '/movements'
+    | '/returns/$id/inspect'
   id:
     | '__root__'
     | '/'
@@ -106,6 +118,7 @@ export interface FileRouteTypes {
     | '/_authenticated/simulation'
     | '/_authenticated/movements/new'
     | '/_authenticated/movements/'
+    | '/_authenticated/returns/$id/inspect'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMovementsNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/returns/$id/inspect': {
+      id: '/_authenticated/returns/$id/inspect'
+      path: '/returns/$id/inspect'
+      fullPath: '/returns/$id/inspect'
+      preLoaderRoute: typeof AuthenticatedReturnsIdInspectRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -173,6 +193,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRoute
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
   AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
+  AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -180,6 +201,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSimulationRoute: AuthenticatedSimulationRoute,
   AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
   AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
+  AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
