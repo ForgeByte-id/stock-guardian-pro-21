@@ -58,7 +58,7 @@ function MovementNewPage() {
       supabase.from("movement_reasons").select("code,name,direction").eq("is_active", true).order("name"),
       supabase.from("channels").select("code,name").eq("is_active", true),
     ]);
-    setProducts(p.data ?? []); setReasons(r.data ?? []); setChannels(c.data ?? []);
+    setProducts(p.data ?? []); setReasons((r.data ?? []) as Reason[]); setChannels(c.data ?? []);
   }
 
   useEffect(() => {
