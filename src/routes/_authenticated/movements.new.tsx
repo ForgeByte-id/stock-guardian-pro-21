@@ -108,11 +108,10 @@ function MovementNewPage() {
       p_batch_id: batchId,
       p_movement_type: movementType,
       p_reason_code: reasonCode,
-      p_channel_code: channelCode === "none" ? null : channelCode,
+      p_channel_code: channelCode === "none" ? undefined : channelCode,
       p_quantity: quantity,
-      p_notes: notes || null,
-      p_order_id: null, p_return_id: null, p_opname_session_id: null,
-    });
+      p_notes: notes || undefined,
+    } as never);
     setSubmitting(false);
     setConfirmOpen(false);
     if (error) { toast.error(error.message); return; }
