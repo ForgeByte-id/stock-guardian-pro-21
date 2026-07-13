@@ -19,6 +19,7 @@ import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedReconciliationReportRouteImport } from './routes/_authenticated/reconciliation.report'
 import { Route as AuthenticatedReconciliationOpnameRouteImport } from './routes/_authenticated/reconciliation.opname'
 import { Route as AuthenticatedReconciliationDailyRouteImport } from './routes/_authenticated/reconciliation.daily'
+import { Route as AuthenticatedProductsBundlesRouteImport } from './routes/_authenticated/products.bundles'
 import { Route as AuthenticatedMovementsNewRouteImport } from './routes/_authenticated/movements.new'
 import { Route as AuthenticatedReturnsIdInspectRouteImport } from './routes/_authenticated/returns.$id.inspect'
 
@@ -76,6 +77,12 @@ const AuthenticatedReconciliationDailyRoute =
     path: '/reconciliation/daily',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProductsBundlesRoute =
+  AuthenticatedProductsBundlesRouteImport.update({
+    id: '/products/bundles',
+    path: '/products/bundles',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMovementsNewRoute =
   AuthenticatedMovementsNewRouteImport.update({
     id: '/movements/new',
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/simulation': typeof AuthenticatedSimulationRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/products/bundles': typeof AuthenticatedProductsBundlesRoute
   '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
   '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/simulation': typeof AuthenticatedSimulationRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/products/bundles': typeof AuthenticatedProductsBundlesRoute
   '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
   '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/simulation': typeof AuthenticatedSimulationRoute
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/_authenticated/products/bundles': typeof AuthenticatedProductsBundlesRoute
   '/_authenticated/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/_authenticated/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
   '/_authenticated/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/simulation'
     | '/movements/new'
+    | '/products/bundles'
     | '/reconciliation/daily'
     | '/reconciliation/opname'
     | '/reconciliation/report'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/simulation'
     | '/movements/new'
+    | '/products/bundles'
     | '/reconciliation/daily'
     | '/reconciliation/opname'
     | '/reconciliation/report'
@@ -165,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/simulation'
     | '/_authenticated/movements/new'
+    | '/_authenticated/products/bundles'
     | '/_authenticated/reconciliation/daily'
     | '/_authenticated/reconciliation/opname'
     | '/_authenticated/reconciliation/report'
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReconciliationDailyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/products/bundles': {
+      id: '/_authenticated/products/bundles'
+      path: '/products/bundles'
+      fullPath: '/products/bundles'
+      preLoaderRoute: typeof AuthenticatedProductsBundlesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/movements/new': {
       id: '/_authenticated/movements/new'
       path: '/movements/new'
@@ -272,6 +292,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRoute
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
+  AuthenticatedProductsBundlesRoute: typeof AuthenticatedProductsBundlesRoute
   AuthenticatedReconciliationDailyRoute: typeof AuthenticatedReconciliationDailyRoute
   AuthenticatedReconciliationOpnameRoute: typeof AuthenticatedReconciliationOpnameRoute
   AuthenticatedReconciliationReportRoute: typeof AuthenticatedReconciliationReportRoute
@@ -284,6 +305,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedSimulationRoute: AuthenticatedSimulationRoute,
   AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
+  AuthenticatedProductsBundlesRoute: AuthenticatedProductsBundlesRoute,
   AuthenticatedReconciliationDailyRoute: AuthenticatedReconciliationDailyRoute,
   AuthenticatedReconciliationOpnameRoute:
     AuthenticatedReconciliationOpnameRoute,
