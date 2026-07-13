@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products.index'
@@ -37,6 +38,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSimulationRoute = AuthenticatedSimulationRouteImport.update({
   id: '/simulation',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/simulation': typeof AuthenticatedSimulationRoute
+  '/users': typeof AuthenticatedUsersRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
   '/products/bundles': typeof AuthenticatedProductsBundlesRoute
   '/products/reference-data': typeof AuthenticatedProductsReferenceDataRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/simulation': typeof AuthenticatedSimulationRoute
+  '/users': typeof AuthenticatedUsersRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
   '/products/bundles': typeof AuthenticatedProductsBundlesRoute
   '/products/reference-data': typeof AuthenticatedProductsReferenceDataRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/simulation': typeof AuthenticatedSimulationRoute
+  '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
   '/_authenticated/products/bundles': typeof AuthenticatedProductsBundlesRoute
   '/_authenticated/products/reference-data': typeof AuthenticatedProductsReferenceDataRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/simulation'
+    | '/users'
     | '/movements/new'
     | '/products/bundles'
     | '/products/reference-data'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/simulation'
+    | '/users'
     | '/movements/new'
     | '/products/bundles'
     | '/products/reference-data'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/simulation'
+    | '/_authenticated/users'
     | '/_authenticated/movements/new'
     | '/_authenticated/products/bundles'
     | '/_authenticated/products/reference-data'
@@ -227,6 +239,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/users': {
+      id: '/_authenticated/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/simulation': {
       id: '/_authenticated/simulation'
@@ -311,6 +330,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRoute
+  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
   AuthenticatedProductsBundlesRoute: typeof AuthenticatedProductsBundlesRoute
   AuthenticatedProductsReferenceDataRoute: typeof AuthenticatedProductsReferenceDataRoute
@@ -325,6 +345,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedSimulationRoute: AuthenticatedSimulationRoute,
+  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
   AuthenticatedProductsBundlesRoute: AuthenticatedProductsBundlesRoute,
   AuthenticatedProductsReferenceDataRoute:
