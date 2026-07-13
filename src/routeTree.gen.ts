@@ -9,38 +9,242 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products.index'
+import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authenticated/movements.index'
+import { Route as AuthenticatedReconciliationReportRouteImport } from './routes/_authenticated/reconciliation.report'
+import { Route as AuthenticatedReconciliationOpnameRouteImport } from './routes/_authenticated/reconciliation.opname'
+import { Route as AuthenticatedReconciliationDailyRouteImport } from './routes/_authenticated/reconciliation.daily'
+import { Route as AuthenticatedProductsReferenceDataRouteImport } from './routes/_authenticated/products.reference-data'
+import { Route as AuthenticatedProductsBundlesRouteImport } from './routes/_authenticated/products.bundles'
+import { Route as AuthenticatedMovementsNewRouteImport } from './routes/_authenticated/movements.new'
+import { Route as AuthenticatedReturnsIdInspectRouteImport } from './routes/_authenticated/returns.$id.inspect'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSimulationRoute = AuthenticatedSimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProductsIndexRoute =
+  AuthenticatedProductsIndexRouteImport.update({
+    id: '/products/',
+    path: '/products/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMovementsIndexRoute =
+  AuthenticatedMovementsIndexRouteImport.update({
+    id: '/movements/',
+    path: '/movements/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReconciliationReportRoute =
+  AuthenticatedReconciliationReportRouteImport.update({
+    id: '/reconciliation/report',
+    path: '/reconciliation/report',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReconciliationOpnameRoute =
+  AuthenticatedReconciliationOpnameRouteImport.update({
+    id: '/reconciliation/opname',
+    path: '/reconciliation/opname',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReconciliationDailyRoute =
+  AuthenticatedReconciliationDailyRouteImport.update({
+    id: '/reconciliation/daily',
+    path: '/reconciliation/daily',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProductsReferenceDataRoute =
+  AuthenticatedProductsReferenceDataRouteImport.update({
+    id: '/products/reference-data',
+    path: '/products/reference-data',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProductsBundlesRoute =
+  AuthenticatedProductsBundlesRouteImport.update({
+    id: '/products/bundles',
+    path: '/products/bundles',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMovementsNewRoute =
+  AuthenticatedMovementsNewRouteImport.update({
+    id: '/movements/new',
+    path: '/movements/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReturnsIdInspectRoute =
+  AuthenticatedReturnsIdInspectRouteImport.update({
+    id: '/returns/$id/inspect',
+    path: '/returns/$id/inspect',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/simulation': typeof AuthenticatedSimulationRoute
+  '/users': typeof AuthenticatedUsersRoute
+  '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/products/bundles': typeof AuthenticatedProductsBundlesRoute
+  '/products/reference-data': typeof AuthenticatedProductsReferenceDataRoute
+  '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
+  '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
+  '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
+  '/movements/': typeof AuthenticatedMovementsIndexRoute
+  '/products/': typeof AuthenticatedProductsIndexRoute
+  '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/simulation': typeof AuthenticatedSimulationRoute
+  '/users': typeof AuthenticatedUsersRoute
+  '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/products/bundles': typeof AuthenticatedProductsBundlesRoute
+  '/products/reference-data': typeof AuthenticatedProductsReferenceDataRoute
+  '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
+  '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
+  '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
+  '/movements': typeof AuthenticatedMovementsIndexRoute
+  '/products': typeof AuthenticatedProductsIndexRoute
+  '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/simulation': typeof AuthenticatedSimulationRoute
+  '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/_authenticated/products/bundles': typeof AuthenticatedProductsBundlesRoute
+  '/_authenticated/products/reference-data': typeof AuthenticatedProductsReferenceDataRoute
+  '/_authenticated/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
+  '/_authenticated/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
+  '/_authenticated/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
+  '/_authenticated/movements/': typeof AuthenticatedMovementsIndexRoute
+  '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
+  '/_authenticated/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/profile'
+    | '/simulation'
+    | '/users'
+    | '/movements/new'
+    | '/products/bundles'
+    | '/products/reference-data'
+    | '/reconciliation/daily'
+    | '/reconciliation/opname'
+    | '/reconciliation/report'
+    | '/movements/'
+    | '/products/'
+    | '/returns/$id/inspect'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/profile'
+    | '/simulation'
+    | '/users'
+    | '/movements/new'
+    | '/products/bundles'
+    | '/products/reference-data'
+    | '/reconciliation/daily'
+    | '/reconciliation/opname'
+    | '/reconciliation/report'
+    | '/movements'
+    | '/products'
+    | '/returns/$id/inspect'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/profile'
+    | '/_authenticated/simulation'
+    | '/_authenticated/users'
+    | '/_authenticated/movements/new'
+    | '/_authenticated/products/bundles'
+    | '/_authenticated/products/reference-data'
+    | '/_authenticated/reconciliation/daily'
+    | '/_authenticated/reconciliation/opname'
+    | '/_authenticated/reconciliation/report'
+    | '/_authenticated/movements/'
+    | '/_authenticated/products/'
+    | '/_authenticated/returns/$id/inspect'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +252,142 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/users': {
+      id: '/_authenticated/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/simulation': {
+      id: '/_authenticated/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof AuthenticatedSimulationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/products/': {
+      id: '/_authenticated/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AuthenticatedProductsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/movements/': {
+      id: '/_authenticated/movements/'
+      path: '/movements'
+      fullPath: '/movements/'
+      preLoaderRoute: typeof AuthenticatedMovementsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reconciliation/report': {
+      id: '/_authenticated/reconciliation/report'
+      path: '/reconciliation/report'
+      fullPath: '/reconciliation/report'
+      preLoaderRoute: typeof AuthenticatedReconciliationReportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reconciliation/opname': {
+      id: '/_authenticated/reconciliation/opname'
+      path: '/reconciliation/opname'
+      fullPath: '/reconciliation/opname'
+      preLoaderRoute: typeof AuthenticatedReconciliationOpnameRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reconciliation/daily': {
+      id: '/_authenticated/reconciliation/daily'
+      path: '/reconciliation/daily'
+      fullPath: '/reconciliation/daily'
+      preLoaderRoute: typeof AuthenticatedReconciliationDailyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/products/reference-data': {
+      id: '/_authenticated/products/reference-data'
+      path: '/products/reference-data'
+      fullPath: '/products/reference-data'
+      preLoaderRoute: typeof AuthenticatedProductsReferenceDataRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/products/bundles': {
+      id: '/_authenticated/products/bundles'
+      path: '/products/bundles'
+      fullPath: '/products/bundles'
+      preLoaderRoute: typeof AuthenticatedProductsBundlesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/movements/new': {
+      id: '/_authenticated/movements/new'
+      path: '/movements/new'
+      fullPath: '/movements/new'
+      preLoaderRoute: typeof AuthenticatedMovementsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/returns/$id/inspect': {
+      id: '/_authenticated/returns/$id/inspect'
+      path: '/returns/$id/inspect'
+      fullPath: '/returns/$id/inspect'
+      preLoaderRoute: typeof AuthenticatedReturnsIdInspectRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRoute
+  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
+  AuthenticatedProductsBundlesRoute: typeof AuthenticatedProductsBundlesRoute
+  AuthenticatedProductsReferenceDataRoute: typeof AuthenticatedProductsReferenceDataRoute
+  AuthenticatedReconciliationDailyRoute: typeof AuthenticatedReconciliationDailyRoute
+  AuthenticatedReconciliationOpnameRoute: typeof AuthenticatedReconciliationOpnameRoute
+  AuthenticatedReconciliationReportRoute: typeof AuthenticatedReconciliationReportRoute
+  AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
+  AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
+  AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSimulationRoute: AuthenticatedSimulationRoute,
+  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
+  AuthenticatedProductsBundlesRoute: AuthenticatedProductsBundlesRoute,
+  AuthenticatedProductsReferenceDataRoute:
+    AuthenticatedProductsReferenceDataRoute,
+  AuthenticatedReconciliationDailyRoute: AuthenticatedReconciliationDailyRoute,
+  AuthenticatedReconciliationOpnameRoute:
+    AuthenticatedReconciliationOpnameRoute,
+  AuthenticatedReconciliationReportRoute:
+    AuthenticatedReconciliationReportRoute,
+  AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
+  AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
+  AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
