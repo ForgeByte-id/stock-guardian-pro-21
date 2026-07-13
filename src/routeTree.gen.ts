@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products.index'
 import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authenticated/movements.index'
 import { Route as AuthenticatedReconciliationReportRouteImport } from './routes/_authenticated/reconciliation.report'
 import { Route as AuthenticatedReconciliationOpnameRouteImport } from './routes/_authenticated/reconciliation.opname'
@@ -45,6 +46,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProductsIndexRoute =
+  AuthenticatedProductsIndexRouteImport.update({
+    id: '/products/',
+    path: '/products/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMovementsIndexRoute =
   AuthenticatedMovementsIndexRouteImport.update({
     id: '/movements/',
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
   '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
   '/movements/': typeof AuthenticatedMovementsIndexRoute
+  '/products/': typeof AuthenticatedProductsIndexRoute
   '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRoutesByTo {
@@ -104,6 +112,7 @@ export interface FileRoutesByTo {
   '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
   '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
   '/movements': typeof AuthenticatedMovementsIndexRoute
+  '/products': typeof AuthenticatedProductsIndexRoute
   '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRoutesById {
@@ -118,6 +127,7 @@ export interface FileRoutesById {
   '/_authenticated/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
   '/_authenticated/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
   '/_authenticated/movements/': typeof AuthenticatedMovementsIndexRoute
+  '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
   '/_authenticated/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
 export interface FileRouteTypes {
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/reconciliation/opname'
     | '/reconciliation/report'
     | '/movements/'
+    | '/products/'
     | '/returns/$id/inspect'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/reconciliation/opname'
     | '/reconciliation/report'
     | '/movements'
+    | '/products'
     | '/returns/$id/inspect'
   id:
     | '__root__'
@@ -157,6 +169,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reconciliation/opname'
     | '/_authenticated/reconciliation/report'
     | '/_authenticated/movements/'
+    | '/_authenticated/products/'
     | '/_authenticated/returns/$id/inspect'
   fileRoutesById: FileRoutesById
 }
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/products/': {
+      id: '/_authenticated/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AuthenticatedProductsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/movements/': {
@@ -256,6 +276,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReconciliationOpnameRoute: typeof AuthenticatedReconciliationOpnameRoute
   AuthenticatedReconciliationReportRoute: typeof AuthenticatedReconciliationReportRoute
   AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
+  AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
   AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
 }
 
@@ -269,6 +290,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReconciliationReportRoute:
     AuthenticatedReconciliationReportRoute,
   AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
+  AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
   AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
 }
 
