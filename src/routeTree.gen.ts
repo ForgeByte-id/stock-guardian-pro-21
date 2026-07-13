@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authenticated/movements.index'
+import { Route as AuthenticatedReconciliationReportRouteImport } from './routes/_authenticated/reconciliation.report'
 import { Route as AuthenticatedReconciliationOpnameRouteImport } from './routes/_authenticated/reconciliation.opname'
 import { Route as AuthenticatedReconciliationDailyRouteImport } from './routes/_authenticated/reconciliation.daily'
 import { Route as AuthenticatedMovementsNewRouteImport } from './routes/_authenticated/movements.new'
@@ -50,6 +51,12 @@ const AuthenticatedMovementsIndexRoute =
     path: '/movements/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReconciliationReportRoute =
+  AuthenticatedReconciliationReportRouteImport.update({
+    id: '/reconciliation/report',
+    path: '/reconciliation/report',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReconciliationOpnameRoute =
   AuthenticatedReconciliationOpnameRouteImport.update({
     id: '/reconciliation/opname',
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/movements/new': typeof AuthenticatedMovementsNewRoute
   '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
+  '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
   '/movements/': typeof AuthenticatedMovementsIndexRoute
   '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -94,6 +102,7 @@ export interface FileRoutesByTo {
   '/movements/new': typeof AuthenticatedMovementsNewRoute
   '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
+  '/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
   '/movements': typeof AuthenticatedMovementsIndexRoute
   '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -107,6 +116,7 @@ export interface FileRoutesById {
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
   '/_authenticated/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/_authenticated/reconciliation/opname': typeof AuthenticatedReconciliationOpnameRoute
+  '/_authenticated/reconciliation/report': typeof AuthenticatedReconciliationReportRoute
   '/_authenticated/movements/': typeof AuthenticatedMovementsIndexRoute
   '/_authenticated/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/movements/new'
     | '/reconciliation/daily'
     | '/reconciliation/opname'
+    | '/reconciliation/report'
     | '/movements/'
     | '/returns/$id/inspect'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/movements/new'
     | '/reconciliation/daily'
     | '/reconciliation/opname'
+    | '/reconciliation/report'
     | '/movements'
     | '/returns/$id/inspect'
   id:
@@ -143,6 +155,7 @@ export interface FileRouteTypes {
     | '/_authenticated/movements/new'
     | '/_authenticated/reconciliation/daily'
     | '/_authenticated/reconciliation/opname'
+    | '/_authenticated/reconciliation/report'
     | '/_authenticated/movements/'
     | '/_authenticated/returns/$id/inspect'
   fileRoutesById: FileRoutesById
@@ -197,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMovementsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reconciliation/report': {
+      id: '/_authenticated/reconciliation/report'
+      path: '/reconciliation/report'
+      fullPath: '/reconciliation/report'
+      preLoaderRoute: typeof AuthenticatedReconciliationReportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reconciliation/opname': {
       id: '/_authenticated/reconciliation/opname'
       path: '/reconciliation/opname'
@@ -234,6 +254,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
   AuthenticatedReconciliationDailyRoute: typeof AuthenticatedReconciliationDailyRoute
   AuthenticatedReconciliationOpnameRoute: typeof AuthenticatedReconciliationOpnameRoute
+  AuthenticatedReconciliationReportRoute: typeof AuthenticatedReconciliationReportRoute
   AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
   AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -245,6 +266,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReconciliationDailyRoute: AuthenticatedReconciliationDailyRoute,
   AuthenticatedReconciliationOpnameRoute:
     AuthenticatedReconciliationOpnameRoute,
+  AuthenticatedReconciliationReportRoute:
+    AuthenticatedReconciliationReportRoute,
   AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
   AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
 }
