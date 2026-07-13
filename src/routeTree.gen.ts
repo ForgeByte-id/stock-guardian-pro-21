@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authenticated/movements.index'
+import { Route as AuthenticatedReconciliationDailyRouteImport } from './routes/_authenticated/reconciliation.daily'
 import { Route as AuthenticatedMovementsNewRouteImport } from './routes/_authenticated/movements.new'
 import { Route as AuthenticatedReturnsIdInspectRouteImport } from './routes/_authenticated/returns.$id.inspect'
 
@@ -48,6 +49,12 @@ const AuthenticatedMovementsIndexRoute =
     path: '/movements/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReconciliationDailyRoute =
+  AuthenticatedReconciliationDailyRouteImport.update({
+    id: '/reconciliation/daily',
+    path: '/reconciliation/daily',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMovementsNewRoute =
   AuthenticatedMovementsNewRouteImport.update({
     id: '/movements/new',
@@ -67,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/simulation': typeof AuthenticatedSimulationRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/movements/': typeof AuthenticatedMovementsIndexRoute
   '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/simulation': typeof AuthenticatedSimulationRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/movements': typeof AuthenticatedMovementsIndexRoute
   '/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -87,6 +96,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/simulation': typeof AuthenticatedSimulationRoute
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/_authenticated/reconciliation/daily': typeof AuthenticatedReconciliationDailyRoute
   '/_authenticated/movements/': typeof AuthenticatedMovementsIndexRoute
   '/_authenticated/returns/$id/inspect': typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/simulation'
     | '/movements/new'
+    | '/reconciliation/daily'
     | '/movements/'
     | '/returns/$id/inspect'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/simulation'
     | '/movements/new'
+    | '/reconciliation/daily'
     | '/movements'
     | '/returns/$id/inspect'
   id:
@@ -117,6 +129,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/simulation'
     | '/_authenticated/movements/new'
+    | '/_authenticated/reconciliation/daily'
     | '/_authenticated/movements/'
     | '/_authenticated/returns/$id/inspect'
   fileRoutesById: FileRoutesById
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMovementsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reconciliation/daily': {
+      id: '/_authenticated/reconciliation/daily'
+      path: '/reconciliation/daily'
+      fullPath: '/reconciliation/daily'
+      preLoaderRoute: typeof AuthenticatedReconciliationDailyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/movements/new': {
       id: '/_authenticated/movements/new'
       path: '/movements/new'
@@ -192,6 +212,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRoute
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
+  AuthenticatedReconciliationDailyRoute: typeof AuthenticatedReconciliationDailyRoute
   AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
   AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
 }
@@ -200,6 +221,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedSimulationRoute: AuthenticatedSimulationRoute,
   AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
+  AuthenticatedReconciliationDailyRoute: AuthenticatedReconciliationDailyRoute,
   AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
   AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
 }
