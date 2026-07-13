@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMovementsIndexRouteImport } from './routes/_authenticated/movements.index'
 import { Route as AuthenticatedMovementsNewRouteImport } from './routes/_authenticated/movements.new'
 
 const AuthRoute = AuthRouteImport.update({
@@ -34,6 +35,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMovementsIndexRoute =
+  AuthenticatedMovementsIndexRouteImport.update({
+    id: '/movements/',
+    path: '/movements/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMovementsNewRoute =
   AuthenticatedMovementsNewRouteImport.update({
     id: '/movements/new',
@@ -46,12 +53,14 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/movements/': typeof AuthenticatedMovementsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/movements': typeof AuthenticatedMovementsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -60,12 +69,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
+  '/_authenticated/movements/': typeof AuthenticatedMovementsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/movements/new'
+  fullPaths: '/' | '/auth' | '/dashboard' | '/movements/new' | '/movements/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/movements/new'
+  to: '/' | '/auth' | '/dashboard' | '/movements/new' | '/movements'
   id:
     | '__root__'
     | '/'
@@ -73,6 +83,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/movements/new'
+    | '/_authenticated/movements/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -111,6 +122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/movements/': {
+      id: '/_authenticated/movements/'
+      path: '/movements'
+      fullPath: '/movements/'
+      preLoaderRoute: typeof AuthenticatedMovementsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/movements/new': {
       id: '/_authenticated/movements/new'
       path: '/movements/new'
@@ -124,11 +142,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
+  AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
+  AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
