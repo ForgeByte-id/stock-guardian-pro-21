@@ -6,14 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useCurrentRole } from "@/hooks/use-role";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
 function ProfilePage() {
-  const { role } = useCurrentRole();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
 
@@ -46,7 +45,7 @@ function ProfilePage() {
         <CardContent className="space-y-3">
           <div className="space-y-1.5"><Label>Email</Label><Input value={email} disabled /></div>
           <div className="space-y-1.5"><Label>Nama Tampilan</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>Role</Label><Input value={role ?? "—"} disabled className="capitalize" /></div>
+          <div className="space-y-1.5"><Label>Role</Label><Input value="Admin" disabled className="capitalize" /></div>
           <div className="flex justify-end"><Button onClick={save}>Simpan</Button></div>
         </CardContent>
       </Card>

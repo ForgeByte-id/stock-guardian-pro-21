@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ChannelCode, MarketplaceService } from "./types";
+import type { ChannelCode, MarketplaceService, OrderItemInput } from "./types";
 
 // Picks 1–3 random products (or a random bundle) and creates a RESERVED order.
 // Stock is NOT deducted at creation — only reservation.
@@ -48,6 +48,31 @@ export const simulationMarketplace: MarketplaceService = {
       const { error: itErr } = await supabase.from("order_items").insert(items);
       if (itErr) throw new Error(itErr.message);
     }
+
+    return { order_id: newOrder.id, order_number: orderNumber };
+  },
+
+  async createOrderWithItems(channel: ChannelCode, items: OrderItemInput[]) {
+    const { data: ch, error: chErr } = await supabase
+      .from("channels").select("id, code").eq("code", channel).maybeSingle();
+    if (chErr || !ch) throw new Error(chErr?.message ?? "Channel not found");
+    if (items.length === 0) throw new Error("Minimal 1 item");
+
+    const orderNumber = `${channel}-${Date.now().toString(36).toUpperCase()}`;
+    const { data: user } = await supabase.auth.getUser();
+    const { data: newOrder, error: ordErr } = await supabase
+      .from("orders").insert({
+        order_number: orderNumber, channel_id: ch.id, status: "RESERVED",
+        created_by: user.user?.id,
+      }).select("id").single();
+    if (ordErr || !newOrder) throw new Error(ordErr?.message ?? "Order create failed");
+
+    const { error: itErr } = await supabase.from("order_items").insert(
+      items.map((i) => ({
+        order_id: newOrder.id, product_id: i.product_id, quantity: i.quantity, is_bundle: false,
+      }))
+    );
+    if (itErr) throw new Error(itErr.message);
 
     return { order_id: newOrder.id, order_number: orderNumber };
   },

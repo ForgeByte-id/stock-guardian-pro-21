@@ -31,4 +31,4 @@ dist-ssr
 *.sln
 *.sw?
 .env
-
+.tmp/

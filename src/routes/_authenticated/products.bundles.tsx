@@ -6,12 +6,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
-import { useCurrentRole } from "@/hooks/use-role";
+import { Plus, Trash2, Info, PackageOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/products/bundles")({
   component: BundlesPage,
@@ -21,7 +21,6 @@ type Bundle = { id: string; name: string; marketplace_listing: string | null; ch
 type Item = { id: string; bundle_id: string; product_id: string; quantity: number };
 
 function BundlesPage() {
-  const { isAdmin } = useCurrentRole();
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
@@ -55,56 +54,108 @@ function BundlesPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      {/* Header */}
+      <div data-tour="bundles-header" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Resep Bundle</h1>
-          <p className="text-sm text-muted-foreground">Bundle otomatis dipecah jadi komponen saat SHIPPED (ledger per komponen).</p>
+          <p className="text-sm text-muted-foreground">
+            Satu SKU marketplace yang terdiri dari beberapa produk maklon. Saat SHIPPED, bundle dipecah otomatis dan stok setiap komponen dicatat secara terpisah di Stock Ledger.
+          </p>
         </div>
-        {isAdmin && <Button onClick={() => setEditing({ items: [{ product_id: "", quantity: 1 }] })}><Plus className="mr-2 h-4 w-4" />Bundle Baru</Button>}
+        <Button data-tour="bundles-add" onClick={() => setEditing({ items: [{ product_id: "", quantity: 1 }] })}>
+          <Plus className="mr-2 h-4 w-4" />Bundle Baru
+        </Button>
       </div>
 
+      {/* Info banner */}
+      <Alert data-tour="bundles-info" className="bg-info/10 border-info/30 text-info-foreground">
+        <Info className="h-4 w-4 shrink-0" />
+        <AlertDescription className="text-xs">
+          <strong className="font-semibold">Contoh:</strong> Produk marketplace "Paket Sabun&Sampo" sebenarnya terdiri dari 2 produk maklon berbeda.
+          Buat bundle — saat order masuk dan status berubah jadi <strong>SHIPPED</strong>, sistem otomatis mengurangi stok Sabun −1 dan Sampo −1 di Stock Ledger.
+        </AlertDescription>
+      </Alert>
+
+      {/* Bundle list */}
       <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader><TableRow><TableHead>Nama</TableHead><TableHead>Marketplace</TableHead><TableHead>Komponen</TableHead></TableRow></TableHeader>
+            <TableHeader>
+              <TableRow>
+                <TableHead data-tour="bundles-col-name">Nama Bundle</TableHead>
+                <TableHead data-tour="bundles-col-sku">Nama SKU Marketplace</TableHead>
+                <TableHead data-tour="bundles-col-components">Komponen</TableHead>
+              </TableRow>
+            </TableHeader>
             <TableBody>
-              {bundles.map((b) => {
-                const its = items.filter((i) => i.bundle_id === b.id);
-                return (
-                  <TableRow key={b.id}>
-                    <TableCell className="font-medium">{b.name}</TableCell>
-                    <TableCell className="text-xs">{b.marketplace_listing ?? "-"}</TableCell>
-                    <TableCell className="text-xs">
-                      {its.map((i) => {
-                        const p = products.find((x) => x.id === i.product_id);
-                        return `${p?.name ?? i.product_id} × ${i.quantity}`;
-                      }).join(" · ")}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {bundles.length === 0 && <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Belum ada bundle.</TableCell></TableRow>}
+              {bundles.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-12 text-muted-foreground">
+                    <PackageOpen className="mx-auto h-8 w-8 mb-3 opacity-30" />
+                    <p className="font-medium">Belum ada bundle</p>
+                    <p className="text-xs mt-1 max-w-md mx-auto">
+                      Bundle merepresentasikan satu produk marketplace yang terdiri dari beberapa produk maklon.
+                      Contoh: "Paket Hadiah Lebaran" berisi Sabun + Sampo + Lulur.
+                    </p>
+                    <Button variant="outline" size="sm" className="mt-4" onClick={() => setEditing({ items: [{ product_id: "", quantity: 1 }] })}>
+                      <Plus className="mr-1.5 h-3.5 w-3.5" />Buat Bundle Pertama
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                bundles.map((b) => {
+                  const its = items.filter((i) => i.bundle_id === b.id);
+                  return (
+                    <TableRow key={b.id}>
+                      <TableCell className="font-medium">{b.name}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{b.marketplace_listing ?? <span className="italic">—</span>}</TableCell>
+                      <TableCell className="text-xs">
+                        {its.map((i) => {
+                          const p = products.find((x) => x.id === i.product_id);
+                          return `${p?.name ?? i.product_id} × ${i.quantity}`;
+                        }).join(" · ")}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
+      {/* ── Dialog: Add Bundle ── */}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Bundle Baru</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1.5"><Label>Nama Bundle</Label><Input value={editing?.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
-            <div className="space-y-1.5"><Label>Marketplace Listing (opsional)</Label><Input value={editing?.marketplace_listing ?? ""} onChange={(e) => setEditing({ ...editing, marketplace_listing: e.target.value })} /></div>
-            <div className="space-y-1.5">
-              <Label>Kanal (opsional)</Label>
-              <select className="w-full border rounded-md h-9 px-2 text-sm bg-background" value={editing?.channel_id ?? ""} onChange={(e) => setEditing({ ...editing, channel_id: e.target.value || null })}>
-                <option value="">-</option>
+          <div className="space-y-4">
+            <div data-tour="bundles-form-name" className="space-y-1.5">
+              <Label>Nama Bundle</Label>
+              <Input value={editing?.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                placeholder="Paket Sabun & Sampo" />
+              <p className="text-xs text-muted-foreground">Nama internal untuk bundle ini.</p>
+            </div>
+            <div data-tour="bundles-form-sku" className="space-y-1.5">
+              <Label>Nama SKU Marketplace</Label>
+              <Input value={editing?.marketplace_listing ?? ""}
+                onChange={(e) => setEditing({ ...editing, marketplace_listing: e.target.value })}
+                placeholder="Sabun Sampo 500ml — 1 pack" />
+              <p className="text-xs text-muted-foreground">Nama produk seperti yang tampil di halaman toko marketplace. Kosongi jika sama dengan Nama Bundle.</p>
+            </div>
+            <div data-tour="bundles-form-channel" className="space-y-1.5">
+              <Label>Channel (opsional)</Label>
+              <select className="w-full border rounded-md h-9 px-2 text-sm bg-background"
+                value={editing?.channel_id ?? ""}
+                onChange={(e) => setEditing({ ...editing, channel_id: e.target.value || null })}>
+                <option value="">Semua channel</option>
                 {channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
+              <p className="text-xs text-muted-foreground">Batasi bundle ini hanya untuk channel tertentu. Pilih "Semua channel" jika berlaku di semua marketplace.</p>
             </div>
-            <div className="space-y-2">
-              <Label>Komponen</Label>
+            <div data-tour="bundles-form-components" className="space-y-2">
+              <Label>Komponen Produk</Label>
+              <p className="text-xs text-muted-foreground -mt-1">Produk maklon yang termasuk dalam bundle ini. Stok setiap produk akan berkurang sesuai jumlah saat bundle dikirim.</p>
               {editing?.items?.map((it, idx) => (
                 <div key={idx} className="flex gap-2">
                   <select className="flex-1 border rounded-md h-9 px-2 text-sm bg-background" value={it.product_id}
@@ -136,7 +187,7 @@ function BundlesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Batal</Button>
-            <Button onClick={saveBundle}>Simpan</Button>
+            <Button onClick={saveBundle}>Simpan Bundle</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

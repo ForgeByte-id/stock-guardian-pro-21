@@ -626,6 +626,141 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_rules: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      promo_rule_conditions: {
+        Row: {
+          id: string
+          product_id: string
+          promo_rule_id: string
+          quantity: number
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          promo_rule_id: string
+          quantity?: number
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          promo_rule_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_rule_conditions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_rule_conditions_promo_rule_id_fkey"
+            columns: ["promo_rule_id"]
+            isOneToOne: false
+            referencedRelation: "promo_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_rule_freebies: {
+        Row: {
+          id: string
+          product_id: string
+          promo_rule_id: string
+          quantity: number
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          promo_rule_id: string
+          quantity?: number
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          promo_rule_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_rule_freebies_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_rule_freebies_promo_rule_id_fkey"
+            columns: ["promo_rule_id"]
+            isOneToOne: false
+            referencedRelation: "promo_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_rule_channels: {
+        Row: {
+          channel_code: string
+          id: string
+          promo_rule_id: string
+        }
+        Insert: {
+          channel_code: string
+          id?: string
+          promo_rule_id: string
+        }
+        Update: {
+          channel_code?: string
+          id?: string
+          promo_rule_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_rule_channels_channel_code_fkey"
+            columns: ["channel_code"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "promo_rule_channels_promo_rule_id_fkey"
+            columns: ["promo_rule_id"]
+            isOneToOne: false
+            referencedRelation: "promo_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

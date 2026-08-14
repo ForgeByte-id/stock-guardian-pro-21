@@ -6,12 +6,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { OnboardingProvider } from "@/components/onboarding/OnboardingProvider";
 
 function NotFoundComponent() {
   return (
@@ -89,20 +90,41 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const [authUserId, setAuthUserId] = useState<string | null | undefined>(undefined);
+  const authChangeVersion = useRef(0);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    let active = true;
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      authChangeVersion.current += 1;
+      setAuthUserId(session?.user?.id ?? null);
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
-    return () => { sub.subscription.unsubscribe(); };
+
+    const requestVersion = authChangeVersion.current;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active && requestVersion === authChangeVersion.current) {
+        setAuthUserId(data.user?.id ?? null);
+      }
+    }).catch(() => {
+      if (active && requestVersion === authChangeVersion.current) setAuthUserId(null);
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster richColors position="top-right" />
+      <OnboardingProvider userId={authUserId}>
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </OnboardingProvider>
     </QueryClientProvider>
   );
 }

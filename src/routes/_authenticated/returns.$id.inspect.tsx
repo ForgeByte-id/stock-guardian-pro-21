@@ -30,6 +30,7 @@ function ReturnInspectPage() {
   const navigate = useNavigate();
   const [row, setRow] = useState<ReturnRow | null>(null);
   const [condition, setCondition] = useState<"RESALABLE" | "DAMAGED" | "LOST">("RESALABLE");
+  const [isResalable, setIsResalable] = useState(true);
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -96,10 +97,10 @@ function ReturnInspectPage() {
       <Card>
         <CardHeader><CardTitle className="text-base">Kondisi Barang Retur</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <RadioGroup value={condition} onValueChange={(v) => setCondition(v as typeof condition)}>
+          <RadioGroup value={condition} onValueChange={(v) => { setCondition(v as typeof condition); setIsResalable(v === "RESALABLE"); }}>
             <div className="space-y-2">
               <Option v="RESALABLE" title="Layak Jual"
-                desc="Barang kembali dalam kondisi baik. Stok akan dikembalikan ke batch asal (entri ledger IN)." />
+                desc="Barang kembali dalam kondisi baik. Stok masuk ke BATCH BARU (origin = retur) untuk memisahkan dari batch asal." />
               <Option v="DAMAGED" title="Rusak"
                 desc="Barang tidak layak jual. Stok TIDAK ditambahkan kembali." />
               <Option v="LOST" title="Hilang di Ekspedisi"
@@ -112,11 +113,18 @@ function ReturnInspectPage() {
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
           </div>
 
-          {condition !== "RESALABLE" && (
+          {condition === "RESALABLE" && (
             <Alert>
+              <AlertDescription className="text-xs">
+                Stok masuk ke batch BARU dengan origin retur — bukan ke batch asal.
+              </AlertDescription>
+            </Alert>
+          )}
+          {!isResalable && (
+            <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                Kondisi ini TIDAK menambah stok kembali — barang tetap hilang dari stok layak jual sejak SHIPPED.
+                TIDAK ada stok yang ditambahkan. Pergerakan stok sudah tercatat saat SHIPPED. {condition === "DAMAGED" ? "Klaim kerusakan" : "Klaim hilang"} tercatat di worklist klaim.
               </AlertDescription>
             </Alert>
           )}

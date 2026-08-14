@@ -23,14 +23,13 @@ const schema = z.object({
   movement_type: z.enum(["IN", "OUT"]),
   reason_code: z.string().min(1),
   product_id: z.string().uuid(),
-  batch_id: z.string().uuid(),
   channel_code: z.string().optional(),
   quantity: z.number().int().positive(),
   notes: z.string().max(500).optional(),
+  reference_note: z.string().max(500).optional(),
 });
 
 type Product = { id: string; name: string; sku: string | null };
-type Batch = { id: string; batch_number: string; current_stock: number; expiry_date: string };
 type Reason = { code: string; name: string; direction: "in" | "out" };
 type Channel = { code: string; name: string };
 
@@ -39,17 +38,18 @@ function MovementNewPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [reasons, setReasons] = useState<Reason[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [batches, setBatches] = useState<Batch[]>([]);
 
   const [movementType, setMovementType] = useState<"IN" | "OUT">("IN");
   const [reasonCode, setReasonCode] = useState<string>("");
   const [productId, setProductId] = useState<string>("");
-  const [batchId, setBatchId] = useState<string>("");
   const [channelCode, setChannelCode] = useState<string>("none");
   const [quantity, setQuantity] = useState<number>(1);
   const [notes, setNotes] = useState("");
+  const [referenceNote, setReferenceNote] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const needsReference = ["bonus", "promo", "sample"].includes(reasonCode);
 
   useEffect(() => { void init(); }, []);
   async function init() {
@@ -61,56 +61,50 @@ function MovementNewPage() {
     setProducts(p.data ?? []); setReasons((r.data ?? []) as Reason[]); setChannels(c.data ?? []);
   }
 
-  useEffect(() => {
-    if (!productId) { setBatches([]); setBatchId(""); return; }
-    void (async () => {
-      const { data } = await supabase.from("batches")
-        .select("id,batch_number,current_stock,expiry_date")
-        .eq("product_id", productId).eq("is_active", true)
-        .order("expiry_date", { ascending: true });
-      const list = data ?? [];
-      // For OUT, hide empty batches; default to earliest expiry (FEFO)
-      const usable = movementType === "OUT" ? list.filter((b) => b.current_stock > 0) : list;
-      setBatches(usable);
-      setBatchId(usable[0]?.id ?? "");
-    })();
-  }, [productId, movementType]);
-
   const filteredReasons = useMemo(
     () => reasons.filter((r) => r.direction === (movementType === "IN" ? "in" : "out")),
     [reasons, movementType]
   );
 
   useEffect(() => {
-    if (!filteredReasons.find((r) => r.code === reasonCode)) setReasonCode(filteredReasons[0]?.code ?? "");
+    if (!filteredReasons.find((r) => r.code === reasonCode)) {
+      setReasonCode(filteredReasons[0]?.code ?? "");
+      setReferenceNote("");
+    }
   }, [filteredReasons, reasonCode]);
 
-  const selectedBatch = batches.find((b) => b.id === batchId);
   const selectedProduct = products.find((p) => p.id === productId);
   const selectedReason = reasons.find((r) => r.code === reasonCode);
 
   function validate() {
+    if (!productId) { toast.error("Pilih produk"); return false; }
+    if (!reasonCode) { toast.error("Pilih alasan"); return false; }
+    if (quantity < 1) { toast.error("Jumlah minimal 1"); return false; }
+    if (needsReference && !referenceNote.trim()) {
+      toast.error("Referensi wajib diisi untuk alasan ini (nama campaign/approval)");
+      return false;
+    }
     const parsed = schema.safeParse({
       movement_type: movementType, reason_code: reasonCode, product_id: productId,
-      batch_id: batchId, channel_code: channelCode === "none" ? undefined : channelCode,
-      quantity, notes: notes || undefined,
+      channel_code: channelCode === "none" ? undefined : channelCode,
+      quantity, notes: notes || undefined, reference_note: referenceNote || undefined,
     });
-    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return false; }
-    if (movementType === "OUT" && selectedBatch && quantity > selectedBatch.current_stock) {
-      toast.error(`Jumlah melebihi stok batch (${selectedBatch.current_stock}).`); return false;
-    }
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Validasi gagal"); return false; }
     return true;
   }
 
   async function submit() {
     setSubmitting(true);
+    const sourceType = movementType === "IN" ? "goods_in_maklon" : "manual_out";
     const { error } = await supabase.rpc("record_stock_movement", {
-      p_batch_id: batchId,
+      p_batch_id: null, // will use FEFO for OUT, or require batch for IN
       p_movement_type: movementType,
       p_reason_code: reasonCode,
       p_channel_code: channelCode === "none" ? undefined : channelCode,
       p_quantity: quantity,
       p_notes: notes || undefined,
+      p_source_type: sourceType,
+      p_reference_note: referenceNote || undefined,
     } as never);
     setSubmitting(false);
     setConfirmOpen(false);
@@ -139,7 +133,7 @@ function MovementNewPage() {
             </Select>
           </Field>
           <Field label="Alasan">
-            <Select value={reasonCode} onValueChange={setReasonCode}>
+            <Select value={reasonCode} onValueChange={(v) => { setReasonCode(v); setReferenceNote(""); }}>
               <SelectTrigger><SelectValue placeholder="Pilih alasan" /></SelectTrigger>
               <SelectContent>
                 {filteredReasons.map((r) => <SelectItem key={r.code} value={r.code}>{r.name}</SelectItem>)}
@@ -151,18 +145,6 @@ function MovementNewPage() {
               <SelectTrigger><SelectValue placeholder="Pilih produk" /></SelectTrigger>
               <SelectContent className="max-h-80">
                 {products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label={movementType === "OUT" ? "Batch (urut FEFO — default terpilih)" : "Batch"}>
-            <Select value={batchId} onValueChange={setBatchId} disabled={!productId}>
-              <SelectTrigger><SelectValue placeholder="Pilih batch" /></SelectTrigger>
-              <SelectContent>
-                {batches.map((b, i) => (
-                  <SelectItem key={b.id} value={b.id}>
-                    {b.batch_number} · Exp {b.expiry_date} · stok {b.current_stock}{i === 0 && movementType === "OUT" ? " ★" : ""}
-                  </SelectItem>
-                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -178,10 +160,24 @@ function MovementNewPage() {
           <Field label="Jumlah">
             <Input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
           </Field>
+          {needsReference && (
+            <Field label="Referensi (wajib)">
+              <Input
+                value={referenceNote}
+                onChange={(e) => setReferenceNote(e.target.value)}
+                placeholder="Nama campaign / catatan approval"
+              />
+            </Field>
+          )}
           <div className="md:col-span-2">
             <Field label="Catatan (opsional)">
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={3} />
             </Field>
+          </div>
+          <div className="md:col-span-2 text-xs text-muted-foreground">
+            {movementType === "OUT"
+              ? "Batch dipilih otomatis berdasarkan FEFO (kedaluwarsa terdekat)."
+              : "Untuk barang masuk, batch dibuat otomatis setelah entri disimpan."}
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <Button variant="outline" onClick={() => navigate({ to: "/movements" })}>Batal</Button>
@@ -200,9 +196,9 @@ function MovementNewPage() {
             <Row k="Tipe" v={movementType === "IN" ? "Barang Masuk" : "Barang Keluar"} />
             <Row k="Alasan" v={selectedReason?.name ?? ""} />
             <Row k="Produk" v={selectedProduct?.name ?? ""} />
-            <Row k="Batch" v={selectedBatch?.batch_number ?? ""} />
-            <Row k="Jumlah" v={quantity} />
+            <Row k="Jumlah" v={quantity.toLocaleString("id-ID")} />
             <Row k="Kanal" v={channelCode === "none" ? "-" : channelCode} />
+            {needsReference && <Row k="Referensi" v={referenceNote} />}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>Batal</Button>

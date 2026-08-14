@@ -12,16 +12,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 export function UserMenu() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       const { data } = await supabase.auth.getUser();
       setEmail(data.user?.email ?? null);
-      if (data.user) {
-        const { data: r } = await supabase.rpc("current_user_role");
-        setRole((r as string | null) ?? null);
-      }
     })();
   }, []);
 
@@ -48,7 +43,7 @@ export function UserMenu() {
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span className="text-sm">{email}</span>
-            <span className="text-xs text-muted-foreground capitalize">{role ?? "—"}</span>
+            <span className="text-xs text-muted-foreground">Admin</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

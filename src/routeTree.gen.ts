@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
+import { Route as AuthenticatedReturnsRouteImport } from './routes/_authenticated/returns'
+import { Route as AuthenticatedPromoRulesRouteImport } from './routes/_authenticated/promo-rules'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products.index'
@@ -48,6 +50,16 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
 const AuthenticatedSimulationRoute = AuthenticatedSimulationRouteImport.update({
   id: '/simulation',
   path: '/simulation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReturnsRoute = AuthenticatedReturnsRouteImport.update({
+  id: '/returns',
+  path: '/returns',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPromoRulesRoute = AuthenticatedPromoRulesRouteImport.update({
+  id: '/promo-rules',
+  path: '/promo-rules',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -110,9 +122,9 @@ const AuthenticatedMovementsNewRoute =
   } as any)
 const AuthenticatedReturnsIdInspectRoute =
   AuthenticatedReturnsIdInspectRouteImport.update({
-    id: '/returns/$id/inspect',
-    path: '/returns/$id/inspect',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/$id/inspect',
+    path: '/$id/inspect',
+    getParentRoute: () => AuthenticatedReturnsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -120,6 +132,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/promo-rules': typeof AuthenticatedPromoRulesRoute
+  '/returns': typeof AuthenticatedReturnsRouteWithChildren
   '/simulation': typeof AuthenticatedSimulationRoute
   '/users': typeof AuthenticatedUsersRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
@@ -137,6 +151,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/promo-rules': typeof AuthenticatedPromoRulesRoute
+  '/returns': typeof AuthenticatedReturnsRouteWithChildren
   '/simulation': typeof AuthenticatedSimulationRoute
   '/users': typeof AuthenticatedUsersRoute
   '/movements/new': typeof AuthenticatedMovementsNewRoute
@@ -156,6 +172,8 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/promo-rules': typeof AuthenticatedPromoRulesRoute
+  '/_authenticated/returns': typeof AuthenticatedReturnsRouteWithChildren
   '/_authenticated/simulation': typeof AuthenticatedSimulationRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/movements/new': typeof AuthenticatedMovementsNewRoute
@@ -175,6 +193,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/profile'
+    | '/promo-rules'
+    | '/returns'
     | '/simulation'
     | '/users'
     | '/movements/new'
@@ -192,6 +212,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/profile'
+    | '/promo-rules'
+    | '/returns'
     | '/simulation'
     | '/users'
     | '/movements/new'
@@ -210,6 +232,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/profile'
+    | '/_authenticated/promo-rules'
+    | '/_authenticated/returns'
     | '/_authenticated/simulation'
     | '/_authenticated/users'
     | '/_authenticated/movements/new'
@@ -264,6 +288,20 @@ declare module '@tanstack/react-router' {
       path: '/simulation'
       fullPath: '/simulation'
       preLoaderRoute: typeof AuthenticatedSimulationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/returns': {
+      id: '/_authenticated/returns'
+      path: '/returns'
+      fullPath: '/returns'
+      preLoaderRoute: typeof AuthenticatedReturnsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/promo-rules': {
+      id: '/_authenticated/promo-rules'
+      path: '/promo-rules'
+      fullPath: '/promo-rules'
+      preLoaderRoute: typeof AuthenticatedPromoRulesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
@@ -338,17 +376,30 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/returns/$id/inspect': {
       id: '/_authenticated/returns/$id/inspect'
-      path: '/returns/$id/inspect'
+      path: '/$id/inspect'
       fullPath: '/returns/$id/inspect'
       preLoaderRoute: typeof AuthenticatedReturnsIdInspectRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedReturnsRoute
     }
   }
 }
 
+interface AuthenticatedReturnsRouteChildren {
+  AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
+}
+
+const AuthenticatedReturnsRouteChildren: AuthenticatedReturnsRouteChildren = {
+  AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
+}
+
+const AuthenticatedReturnsRouteWithChildren =
+  AuthenticatedReturnsRoute._addFileChildren(AuthenticatedReturnsRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedPromoRulesRoute: typeof AuthenticatedPromoRulesRoute
+  AuthenticatedReturnsRoute: typeof AuthenticatedReturnsRouteWithChildren
   AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedMovementsNewRoute: typeof AuthenticatedMovementsNewRoute
@@ -359,12 +410,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReconciliationReportRoute: typeof AuthenticatedReconciliationReportRoute
   AuthenticatedMovementsIndexRoute: typeof AuthenticatedMovementsIndexRoute
   AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
-  AuthenticatedReturnsIdInspectRoute: typeof AuthenticatedReturnsIdInspectRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedPromoRulesRoute: AuthenticatedPromoRulesRoute,
+  AuthenticatedReturnsRoute: AuthenticatedReturnsRouteWithChildren,
   AuthenticatedSimulationRoute: AuthenticatedSimulationRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedMovementsNewRoute: AuthenticatedMovementsNewRoute,
@@ -378,7 +430,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedReconciliationReportRoute,
   AuthenticatedMovementsIndexRoute: AuthenticatedMovementsIndexRoute,
   AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
-  AuthenticatedReturnsIdInspectRoute: AuthenticatedReturnsIdInspectRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
