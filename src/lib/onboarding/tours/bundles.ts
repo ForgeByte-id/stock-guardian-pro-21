@@ -4,8 +4,8 @@ export const bundlesTour: TourConfig = {
   id: "bundles",
   version: 1,
   route: "/products/bundles",
-  title: "Tutorial Resep Bundle",
-  description: "Pelajari cara membuat bundle produk marketplace yang terdiri dari beberapa produk maklon.",
+  title: "Tutorial resep Bundle",
+  description: "Pelajari cara kerja Bundle marketplace dan resep komponennya.",
   roles: ["admin"],
   autoStart: true,
   steps: [
@@ -14,23 +14,23 @@ export const bundlesTour: TourConfig = {
       target: "[data-tour='bundles-header']",
       title: "Halaman Resep Bundle",
       description:
-        "Bundle adalah satu SKU marketplace yang berisi beberapa produk maklon. Contoh: 'Paket Sabun & Sampo' sebenarnya berisi 2 produk terpisah.",
+        "Satu SKU marketplace dapat mewakili Bundle yang berisi beberapa produk maklon. Contoh: 'Paket Sabun & Sampo' berisi 2 produk terpisah.",
       position: "bottom",
     },
     {
       id: "bundles-info",
       target: "[data-tour='bundles-info']",
-      title: "Cara Kerja Bundle",
+      title: "Cara kerja Bundle",
       description:
-        "Saat pesanan dengan bundle dikirim (SHIPPED), sistem otomatis memecah bundle dan mengurangi stok setiap komponen secara terpisah di Stock Ledger. Stok akan selalu akurat karena setiap komponen dicatat sendiri.",
+        "Saat pesanan berstatus SHIPPED, sistem memecah Bundle menjadi komponen dan mengurangi stok tiap produk di Stock Ledger. Setiap komponen tercatat sendiri agar jejak stok mudah ditelusuri.",
       position: "bottom",
     },
     {
       id: "bundles-add",
       target: "[data-tour='bundles-add']",
-      title: "Buat Bundle Baru",
+      title: "Buat Bundle baru",
       description:
-        "Klik tombol ini untuk mulai membuat bundle. Anda akan memilih produk maklon yang termasuk di dalamnya dan jumlah masing-masing.",
+        "Mulai buat Bundle baru dengan memilih produk komponen dan jumlahnya.",
       position: "left",
     },
     {
@@ -38,23 +38,23 @@ export const bundlesTour: TourConfig = {
       target: "[data-tour='bundles-col-name']",
       title: "Nama Bundle",
       description:
-        "Nama internal bundle yang Anda buat. Gunakan nama yang mudah dikenali, seperti 'Paket Hadiah Lebaran'.",
+        "Nama internal Bundle. Gunakan nama yang mudah dikenali, seperti 'Paket Hadiah Lebaran'.",
       position: "bottom",
     },
     {
       id: "bundles-col-sku",
       target: "[data-tour='bundles-col-sku']",
-      title: "Nama SKU Marketplace",
+      title: "Nama SKU marketplace",
       description:
-        "Nama produk seperti yang tampil di halaman toko marketplace. Bisa berbeda dari nama internal bundle. Contoh: 'Sabun Sampo 500ml — 1 pack'.",
+        "Nama SKU yang tampil di toko marketplace. Bisa berbeda dari nama internal Bundle. Contoh: 'Sabun Sampo 500ml — 1 pack'.",
       position: "bottom",
     },
     {
       id: "bundles-col-components",
       target: "[data-tour='bundles-col-components']",
-      title: "Komponen",
+      title: "Komponen Bundle",
       description:
-        "Daftar produk maklon yang membentuk bundle ini beserta jumlahnya. Misal: Sabun ×1, Sampo ×1, Lulur ×2.",
+        "Daftar produk maklon dan jumlah tiap produk dalam Bundle. Contoh: Sabun ×1, Sampo ×1, Lulur ×2.",
       position: "bottom",
     },
   ],

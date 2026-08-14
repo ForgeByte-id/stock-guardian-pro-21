@@ -50,21 +50,21 @@ function ReportPage() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Laporan Selisih & Pergerakan</h1>
-          <p className="text-sm text-muted-foreground">Drill-down transaksi berdasarkan alasan dan kanal.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Laporan selisih dan pergerakan</h1>
+          <p className="text-sm text-muted-foreground">Tinjau pergerakan di Stock Ledger berdasarkan Reason dan Channel. Pilih baris untuk melihat detail transaksinya.</p>
         </div>
         <Select value={range} onValueChange={setRange}>
           <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="7">7 Hari</SelectItem>
-            <SelectItem value="30">30 Hari</SelectItem>
-            <SelectItem value="90">90 Hari</SelectItem>
+            <SelectItem value="7">7 hari terakhir</SelectItem>
+            <SelectItem value="30">30 hari terakhir</SelectItem>
+            <SelectItem value="90">90 hari terakhir</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Distribusi Pengeluaran per Alasan</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Jumlah OUT berdasarkan Reason</CardTitle></CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer>
             <BarChart data={reasonData}>
@@ -80,13 +80,13 @@ function ReportPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">Per Alasan</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Per Reason (alasan)</CardTitle></CardHeader>
           <CardContent className="p-0">
             <Table>
-              <TableHeader><TableRow><TableHead>Alasan</TableHead><TableHead className="text-right">Transaksi</TableHead><TableHead className="text-right">Unit</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Reason</TableHead><TableHead className="text-right">Jumlah transaksi</TableHead><TableHead className="text-right">Jumlah unit</TableHead></TableRow></TableHeader>
               <TableBody>
                 {[...byReason.entries()].map(([k, v]) => (
-                  <TableRow key={k} className="cursor-pointer hover:bg-muted/40" onClick={() => { setDrill(v); setDrillTitle(`Alasan: ${k}`); }}>
+                  <TableRow key={k} className="cursor-pointer hover:bg-muted/40" onClick={() => { setDrill(v); setDrillTitle(`Reason: ${k}`); }}>
                     <TableCell>{k}</TableCell>
                     <TableCell className="text-right tabular-nums">{v.length}</TableCell>
                     <TableCell className="text-right tabular-nums">{v.reduce((s, l) => s + l.quantity, 0)}</TableCell>
@@ -97,13 +97,13 @@ function ReportPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base">Per Kanal</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Per Channel (kanal)</CardTitle></CardHeader>
           <CardContent className="p-0">
             <Table>
-              <TableHeader><TableRow><TableHead>Kanal</TableHead><TableHead className="text-right">Transaksi</TableHead><TableHead className="text-right">Unit</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Channel</TableHead><TableHead className="text-right">Jumlah transaksi</TableHead><TableHead className="text-right">Jumlah unit</TableHead></TableRow></TableHeader>
               <TableBody>
                 {[...byChannel.entries()].map(([k, v]) => (
-                  <TableRow key={k} className="cursor-pointer hover:bg-muted/40" onClick={() => { setDrill(v); setDrillTitle(`Kanal: ${k}`); }}>
+                  <TableRow key={k} className="cursor-pointer hover:bg-muted/40" onClick={() => { setDrill(v); setDrillTitle(`Channel: ${k}`); }}>
                     <TableCell>{k}</TableCell>
                     <TableCell className="text-right tabular-nums">{v.length}</TableCell>
                     <TableCell className="text-right tabular-nums">{v.reduce((s, l) => s + l.quantity, 0)}</TableCell>
@@ -120,7 +120,7 @@ function ReportPage() {
           <DialogHeader><DialogTitle>{drillTitle}</DialogTitle></DialogHeader>
           <div className="max-h-96 overflow-auto">
             <Table>
-              <TableHeader><TableRow><TableHead>Waktu</TableHead><TableHead>Produk / Batch</TableHead><TableHead>Arah</TableHead><TableHead className="text-right">Jumlah</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Waktu</TableHead><TableHead>Produk / Batch</TableHead><TableHead>Arah (IN / OUT)</TableHead><TableHead className="text-right">Jumlah unit</TableHead></TableRow></TableHeader>
               <TableBody>
                 {drill?.map((l) => (
                   <TableRow key={l.id}>
@@ -136,7 +136,7 @@ function ReportPage() {
               </TableBody>
             </Table>
           </div>
-          <div className="flex justify-end"><Button variant="outline" onClick={() => setDrill(null)}>Tutup</Button></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setDrill(null)}>Tutup detail</Button></div>
         </DialogContent>
       </Dialog>
     </div>

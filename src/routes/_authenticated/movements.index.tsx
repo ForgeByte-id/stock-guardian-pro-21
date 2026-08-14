@@ -208,13 +208,13 @@ function MovementsHistoryPage() {
     setKoreksiTarget(null);
     setKoreksiNote("");
     if (error) { toast.error(error.message); return; }
-    toast.success("Koreksi entri berhasil — entri pembalik tercatat.");
+    toast.success("Koreksi entri berhasil — entri pembalik tercatat di Stock Ledger.");
     void loadAll();
     if (traceProductId && traceProductId !== "all") void loadTrace(traceProductId);
   }
 
   function exportCsv() {
-    const header = ["Waktu", "Produk", "Alasan", "Channel", "Ref", "Qty"];
+    const header = ["Waktu", "Produk", "Reason (alasan)", "Channel (kanal)", "Ref (referensi)", "Qty (jumlah)"];
     const lines = [header.join(",")];
     filteredRows.forEach((r) => {
       const qty = r.direction === "in" ? `+${r.quantity}` : `-${r.quantity}`;
@@ -239,14 +239,14 @@ function MovementsHistoryPage() {
       {/* Page header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Riwayat Jurnal Stok</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Stock Ledger</h1>
           <p className="text-sm text-muted-foreground">
-            Buku besar pergerakan stok &mdash; <span className="font-medium text-foreground/70">append-only, tidak dapat diedit.</span>
+            Buku besar pergerakan stok &mdash; <span className="font-medium text-foreground/70">append-only: entri hanya bisa ditambah, tidak dapat diedit atau dihapus.</span>
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportCsv}><Download className="mr-1.5 h-4 w-4" />Export CSV</Button>
-          <Button asChild><Link to="/movements/new"><Plus className="mr-1.5 h-4 w-4" />Catat Pergerakan</Link></Button>
+          <Button variant="outline" onClick={exportCsv}><Download className="mr-1.5 h-4 w-4" />Ekspor CSV</Button>
+          <Button asChild><Link to="/movements/new"><Plus className="mr-1.5 h-4 w-4" />Catat pergerakan</Link></Button>
         </div>
       </div>
 
@@ -256,12 +256,12 @@ function MovementsHistoryPage() {
       <Card>
         <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-3">
           <div>
-            <CardTitle className="text-base">Telusur Selisih</CardTitle>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Setiap unit bisa ditelusuri sampai kejadian aslinya &mdash; filter berdasarkan produk.</p>
+            <CardTitle className="text-base">Telusur selisih stok</CardTitle>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Telusuri setiap unit sampai kejadian asalnya &mdash; pilih produk untuk melihat pergerakan dan saldo.</p>
           </div>
           <div className="w-56">
             <Select value={traceProductId} onValueChange={setTraceProductId}>
-              <SelectTrigger className="h-8"><SelectValue placeholder="Pilih produk…" /></SelectTrigger>
+              <SelectTrigger className="h-8"><SelectValue placeholder="Pilih produk untuk ditelusuri…" /></SelectTrigger>
               <SelectContent className="max-h-72">
                 <SelectItem value="all">— Semua produk —</SelectItem>
                 {products.map((p) => (
@@ -278,18 +278,18 @@ function MovementsHistoryPage() {
           {!traceProductId || traceProductId === "all" ? (
             <div className="text-center py-12 text-muted-foreground">
               <AlertTriangle className="mx-auto h-6 w-6 mb-2 opacity-30" />
-              <p className="font-medium">Pilih produk untuk ditelusuri</p>
-              <p className="text-xs mt-1">Gunakan filter di atas untuk melihat riwayat pergerakan dan saldo per produk.</p>
+              <p className="font-medium">Pilih produk untuk melihat jejak stok</p>
+              <p className="text-xs mt-1">Gunakan pilihan di atas untuk melihat riwayat pergerakan dan saldo produk.</p>
             </div>
           ) : traceLoading ? (
             <div className="text-center py-8">
               <div className="inline-block h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-muted-foreground mt-2">Memuat data…</p>
+              <p className="text-xs text-muted-foreground mt-2">Memuat riwayat stok…</p>
             </div>
           ) : traceRows.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p className="font-medium">Tidak ada pergerakan</p>
-              <p className="text-xs mt-1">Produk ini belum memiliki riwayat stok.</p>
+              <p className="font-medium">Belum ada pergerakan stok</p>
+              <p className="text-xs mt-1">Belum ada riwayat stok untuk produk ini.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -298,10 +298,10 @@ function MovementsHistoryPage() {
                   <tr className="border-b bg-muted/30 text-xs text-muted-foreground">
                     <th className="text-left font-medium py-2.5 px-3">Waktu</th>
                     <th className="text-left font-medium py-2.5 px-3">Pergerakan</th>
-                    <th className="text-left font-medium py-2.5 px-3">Channel</th>
+                    <th className="text-left font-medium py-2.5 px-3">Channel (kanal)</th>
                     <th className="text-left font-medium py-2.5 px-3">Batch</th>
-                    <th className="text-left font-medium py-2.5 px-3">Ref</th>
-                    <th className="text-right font-medium py-2.5 px-3">Qty</th>
+                    <th className="text-left font-medium py-2.5 px-3">Ref (referensi)</th>
+                    <th className="text-right font-medium py-2.5 px-3">Qty (jumlah)</th>
                     <th className="text-right font-medium py-2.5 px-3">Saldo</th>
                   </tr>
                 </thead>
@@ -353,7 +353,7 @@ function MovementsHistoryPage() {
         </CardContent>
         {traceRows.length > 0 && (
           <div className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground flex justify-between bg-muted/10">
-            <span>{traceRows.length} transaksi</span>
+            <span>{traceRows.length} entri</span>
             <span>Saldo terkini: <strong className="text-foreground/70">{traceRows[0].stock_after.toLocaleString("id-ID")}</strong> unit</span>
           </div>
         )}
@@ -364,27 +364,27 @@ function MovementsHistoryPage() {
       {/* ──────────────────────────────────────────────── */}
       <Card>
         <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-3">
-          <CardTitle className="text-base">Seluruh Pergerakan</CardTitle>
+          <CardTitle className="text-base">Semua pergerakan stok</CardTitle>
           <div className="flex flex-wrap items-center gap-2">
             {/* Search */}
             <div className="relative w-44">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input placeholder="Cari produk/batch…" value={search}
+              <Input placeholder="Cari produk atau batch…" value={search}
                 onChange={(e) => setSearch(e.target.value)} className="pl-8 h-8 text-sm" />
             </div>
             {/* Filter: Alasan */}
             <Select value={reasonCode} onValueChange={setReasonCode}>
-              <SelectTrigger className="w-36 h-8"><SelectValue placeholder="Alasan" /></SelectTrigger>
+              <SelectTrigger className="w-36 h-8"><SelectValue placeholder="Reason (alasan)" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Semua alasan</SelectItem>
+                <SelectItem value="all">Semua reason</SelectItem>
                 {reasons.map((r) => <SelectItem key={r.code} value={r.code}>{r.name}</SelectItem>)}
               </SelectContent>
             </Select>
             {/* Filter: Channel */}
             <Select value={channelCode} onValueChange={setChannelCode}>
-              <SelectTrigger className="w-32 h-8"><SelectValue placeholder="Kanal" /></SelectTrigger>
+              <SelectTrigger className="w-32 h-8"><SelectValue placeholder="Channel (kanal)" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Semua kanal</SelectItem>
+                <SelectItem value="all">Semua channel</SelectItem>
                 {channels.map((c) => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -397,18 +397,18 @@ function MovementsHistoryPage() {
                 <tr className="border-b bg-muted/30 text-xs text-muted-foreground">
                   <th className="text-left font-medium py-2.5 px-3">Waktu</th>
                   <th className="text-left font-medium py-2.5 px-3">Produk</th>
-                  <th className="text-left font-medium py-2.5 px-3">Alasan</th>
-                  <th className="text-left font-medium py-2.5 px-3">Channel</th>
-                  <th className="text-left font-medium py-2.5 px-3">Ref</th>
-                  <th className="text-right font-medium py-2.5 px-3">Qty</th>
+                  <th className="text-left font-medium py-2.5 px-3">Reason (alasan)</th>
+                  <th className="text-left font-medium py-2.5 px-3">Channel (kanal)</th>
+                  <th className="text-left font-medium py-2.5 px-3">Ref (referensi)</th>
+                  <th className="text-right font-medium py-2.5 px-3">Qty (jumlah)</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-muted-foreground">
-                      <p className="font-medium">Belum ada pergerakan</p>
-                      <p className="text-xs mt-1">Coba ubah filter atau buat entri baru lewat tombol Catat Pergerakan.</p>
+                      <p className="font-medium">Belum ada pergerakan stok</p>
+                      <p className="text-xs mt-1">Coba ubah filter, atau catat entri baru dengan tombol di atas.</p>
                     </td>
                   </tr>
                 ) : (
@@ -447,7 +447,7 @@ function MovementsHistoryPage() {
         </CardContent>
         {allRows.length > 0 && (
           <div className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground flex justify-between bg-muted/10">
-            <span>{filteredRows.length} dari {allRows.length} transaksi</span>
+            <span>{filteredRows.length} dari {allRows.length} entri</span>
             <span className="tabular-nums">
               Masuk: <strong className="text-success-foreground">+{totalIn.toLocaleString("id-ID")}</strong>
               &nbsp;·&nbsp;
@@ -465,17 +465,17 @@ function MovementsHistoryPage() {
             <DialogDescription>
               Membuat entri pembalik untuk pergerakan {koreksiTarget?.direction === "in" ? "MASUK" : "KELUAR"} sebanyak {koreksiTarget?.quantity} unit &mdash;
               {koreksiTarget?.batch?.products?.name ?? "produk"} batch {koreksiTarget?.batch?.batch_number ?? "-"}.
-              <br /><span className="text-destructive font-medium">Aksi ini permanen.</span>
+              <br /><span className="text-destructive font-medium">Aksi ini permanen dan menambah entri baru ke Stock Ledger.</span>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Catatan koreksi (opsional)</Label>
-            <Input value={koreksiNote} onChange={(e) => setKoreksiNote(e.target.value)} placeholder="Misal: salah catat jumlah" />
+            <Input value={koreksiNote} onChange={(e) => setKoreksiNote(e.target.value)} placeholder="Contoh: salah catat jumlah" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setKoreksiTarget(null)}>Batal</Button>
             <Button variant="destructive" disabled={koreksiBusy} onClick={koreksiEntri}>
-              {koreksiBusy ? "Memproses…" : "Buat Entri Pembalik"}
+              {koreksiBusy ? "Memproses…" : "Buat entri pembalik"}
             </Button>
           </DialogFooter>
         </DialogContent>

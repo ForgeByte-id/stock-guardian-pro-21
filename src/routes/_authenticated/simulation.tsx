@@ -38,11 +38,11 @@ let _tempId = 0;
 
 /* ── Status helpers ── */
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  RESERVED:  { label: "RESERVED",  cls: "bg-info/15 text-info-foreground border-info/40" },
-  SHIPPED:   { label: "SHIPPED",   cls: "bg-primary/15 text-primary border-primary/40" },
-  IN_TRANSIT:{ label: "IN_TRANSIT",cls: "bg-primary/15 text-primary border-primary/40" },
-  CANCELLED: { label: "BATAL",     cls: "bg-muted text-muted-foreground" },
-  RETURNED:  { label: "RETUR",     cls: "bg-warning/15 text-warning-foreground border-warning/40" },
+  RESERVED:  { label: "RESERVED · reservasi", cls: "bg-info/15 text-info-foreground border-info/40" },
+  SHIPPED:   { label: "SHIPPED · stok berkurang", cls: "bg-primary/15 text-primary border-primary/40" },
+  IN_TRANSIT:{ label: "IN_TRANSIT · stok berkurang",cls: "bg-primary/15 text-primary border-primary/40" },
+  CANCELLED: { label: "CANCELLED · dibatalkan", cls: "bg-muted text-muted-foreground" },
+  RETURNED:  { label: "RETURNED · retur diterima", cls: "bg-warning/15 text-warning-foreground border-warning/40" },
 };
 
 function statusBadge(s: string, ch?: string) {
@@ -105,7 +105,7 @@ function SimulationPage() {
         channel,
         validItems.map((it) => ({ product_id: it.product_id, quantity: it.quantity }))
       );
-      toast.success(`Order ${result.order_number} dibuat (RESERVED).`);
+      toast.success(`Pesanan ${result.order_number} dibuat (RESERVED: reservasi).`);
       setItems([emptyItem()]);
       await loadAll();
     } catch (e) {
@@ -133,8 +133,8 @@ function SimulationPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Simulasi Marketplace</h1>
         <p className="text-sm text-muted-foreground">
-          Pengganti sementara API marketplace. Event disuntik seolah dari Shopee/TikTok &mdash;
-          logika identik dengan webhook asli.
+              Uji pesanan Shopee dan TikTok tanpa API marketplace. Event simulasi mengikuti jalur webhook, yaitu jalur penerimaan pembaruan dari marketplace.
+          asli, sehingga aturan stoknya tetap sama.
         </p>
       </div>
 
@@ -143,7 +143,7 @@ function SimulationPage() {
         <CardHeader className="border-b border-border/40 pb-3">
           <div className="flex items-center gap-2 text-base font-semibold">
             <ShoppingCart className="h-4 w-4 text-primary" />
-            Buat Pesanan Baru
+            Buat pesanan simulasi
           </div>
         </CardHeader>
         <CardContent className="pt-4 space-y-4">
@@ -166,7 +166,7 @@ function SimulationPage() {
           {/* Items list */}
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-              Item Pesanan
+              Produk dan jumlah pesanan
             </Label>
 
             {items.map((item, idx) => (
@@ -177,7 +177,7 @@ function SimulationPage() {
                     onValueChange={(v) => updateItem(idx, "product_id", v)}
                   >
                     <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Pilih produk…" />
+                      <SelectValue placeholder="Pilih produk untuk dipesan…" />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
                       {products.map((p) => (
@@ -207,7 +207,7 @@ function SimulationPage() {
             ))}
 
             <Button variant="outline" size="sm" onClick={addItem} className="w-full mt-1">
-              <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah Produk
+              <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah produk
             </Button>
           </div>
 
@@ -219,17 +219,18 @@ function SimulationPage() {
               onClick={handleCreateOrder}
             >
               {busy ? (
-                "Memproses…"
+                "Menyimpan pesanan…"
               ) : (
                 <>
                   <ArrowRightFromLine className="mr-2 h-4 w-4" />
-                  Buat Pesanan &mdash; RESERVED
+                  Buat pesanan &mdash; RESERVED
                 </>
               )}
             </Button>
             <p className="text-[11px] text-muted-foreground text-center">
               <Webhook className="inline h-3 w-3 mr-0.5 align-text-bottom" />
-              Order baru = reservasi, belum menyentuh ledger. Stok baru terpotong saat <strong>Set Dikirim</strong>.
+              Pesanan baru berstatus RESERVED (reservasi), belum mengurangi stok di Stock Ledger
+              (catatan setiap perubahan stok). Stok berkurang saat <strong>Set Dikirim</strong>.
             </p>
           </div>
         </CardContent>
@@ -238,10 +239,10 @@ function SimulationPage() {
       {/* ── Orders List ── */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base">Daftar Pesanan</CardTitle>
+          <CardTitle className="text-base">Daftar pesanan simulasi</CardTitle>
           <div className="relative w-52">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input placeholder="Cari nomor/kanal…" value={search}
+            <Input placeholder="Cari nomor pesanan atau channel…" value={search}
               onChange={(e) => setSearch(e.target.value)} className="pl-8 h-8 text-sm" />
           </div>
         </CardHeader>
@@ -250,11 +251,11 @@ function SimulationPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30 text-xs text-muted-foreground">
-                  <th className="text-left font-medium py-2.5 px-3">Nomor</th>
-                  <th className="text-left font-medium py-2.5 px-3">Kanal</th>
+                  <th className="text-left font-medium py-2.5 px-3">Nomor pesanan</th>
+                  <th className="text-left font-medium py-2.5 px-3">Channel</th>
                   <th className="text-left font-medium py-2.5 px-3">Status</th>
                   <th className="text-left font-medium py-2.5 px-3">Dibuat</th>
-                  <th className="text-right font-medium py-2.5 px-3">Aksi</th>
+                  <th className="text-right font-medium py-2.5 px-3">Aksi pesanan</th>
                 </tr>
               </thead>
               <tbody>
@@ -262,8 +263,8 @@ function SimulationPage() {
                   <tr>
                     <td colSpan={5} className="text-center py-12 text-muted-foreground">
                       <ShoppingCart className="mx-auto h-8 w-8 mb-2 opacity-30" />
-                      <p className="font-medium">Belum ada pesanan</p>
-                      <p className="text-xs mt-1">Pilih produk dan kanal di atas, lalu klik Buat Pesanan.</p>
+                      <p className="font-medium">Belum ada pesanan simulasi</p>
+                      <p className="text-xs mt-1">Pilih produk dan channel, lalu klik Buat pesanan.</p>
                     </td>
                   </tr>
                 ) : (
@@ -295,15 +296,15 @@ function SimulationPage() {
                                 <Button size="sm" disabled={busy}
                                   onClick={() => act(
                                     () => simulationMarketplace.shipOrder(o.id),
-                                    `Order ${isShopee ? "dikirim (SHIPPED)" : "dalam perjalanan (IN_TRANSIT)"} — stok dipotong (FEFO).`
+                                    `Pesanan ${isShopee ? "dikirim (SHIPPED)" : "dalam perjalanan (IN_TRANSIT)"} — stok berkurang otomatis dengan FEFO (batch kedaluwarsa terdekat).`
                                   )}>
                                   <Truck className="mr-1 h-3.5 w-3.5" />
-                                  Kirim
+                                  Tandai dikirim
                                 </Button>
                                 <Button size="sm" variant="outline" disabled={busy}
                                   onClick={() => { setCancelOrder(o); setCancelReason(""); }}>
                                   <Ban className="mr-1 h-3.5 w-3.5" />
-                                  Batal
+                                  Batalkan
                                 </Button>
                               </>
                             )}
@@ -312,15 +313,15 @@ function SimulationPage() {
                                 <Button size="sm" variant="outline" disabled={busy}
                                   onClick={() => { setCancelOrder(o); setCancelReason(""); }}>
                                   <Undo2 className="mr-1 h-3.5 w-3.5" />
-                                  Batal
+                                  Batalkan
                                 </Button>
                                 <Button size="sm" variant="outline" disabled={busy}
                                   onClick={() => act(async () => {
                                     const { return_id } = await simulationMarketplace.receiveReturn(o.id);
                                     window.location.href = `/returns/${return_id}/inspect`;
-                                  }, "Retur diterima — silakan inspeksi.")}>
+                                  }, "Retur diterima — lanjutkan inspeksi kondisi barang.")}>
                                   <Undo2 className="mr-1 h-3.5 w-3.5 rotate-180" />
-                                  Retur
+                                  Catat retur
                                 </Button>
                               </>
                             )}
@@ -348,7 +349,7 @@ function SimulationPage() {
             <span className="text-[11px]">
               {orders.filter((o) => o.status === "RESERVED").length} reservasi aktif
               · {orders.filter((o) => o.status === "SHIPPED" || o.status.startsWith("IN_")).length} dalam perjalanan
-              · {orders.filter((o) => o.status === "CANCELLED").length} batal
+              · {orders.filter((o) => o.status === "CANCELLED").length} dibatalkan
             </span>
           </div>
         )}
@@ -360,33 +361,34 @@ function SimulationPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-destructive" />
-              Batalkan Pesanan
+              Batalkan pesanan
             </DialogTitle>
             <DialogDescription>
-              Order <span className="font-mono font-medium">{cancelOrder?.order_number}</span> &mdash; {cancelOrder?.channel?.name}
+              Pesanan <span className="font-mono font-medium">{cancelOrder?.order_number}</span> &mdash; {cancelOrder?.channel?.name}
             </DialogDescription>
           </DialogHeader>
           <div className="bg-muted/30 rounded-lg p-3 text-sm space-y-1">
             {cancelOrder?.status === "SHIPPED" ? (
               <>
-                <p className="font-medium text-warning-foreground">Order sudah SHIPPED</p>
+                <p className="font-medium text-warning-foreground">Pesanan sudah SHIPPED (stok sudah berkurang)</p>
                 <p className="text-xs text-muted-foreground">
-                  Stok akan dikembalikan ke batch asal lewat entri ledger IN (reason: cancellation).
-                  Batch dipulihkan sesuai alokasi FEFO saat pengiriman.
+                  Stok akan dikembalikan ke batch asal lewat entri IN di Stock Ledger (catatan perubahan stok),
+                  dengan reason cancellation. Batch dipulihkan sesuai alokasi FEFO saat pengiriman.
                 </p>
               </>
             ) : (
               <>
-                <p className="font-medium text-info-foreground">Order masih RESERVED</p>
+                <p className="font-medium text-info-foreground">Pesanan masih RESERVED (reservasi)</p>
                 <p className="text-xs text-muted-foreground">
-                  Tidak ada entri ledger yang ditulis (stok belum berkurang). Order akan langsung diubah statusnya menjadi CANCELLED.
+                  Tidak ada entri Stock Ledger yang ditulis karena stok belum berkurang. Pesanan langsung
+                  berubah menjadi CANCELLED (dibatalkan).
                 </p>
               </>
             )}
           </div>
           <div className="space-y-1.5">
-            <Label>Alasan Pembatalan</Label>
-            <Input value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} placeholder="mis. Pembeli batal" />
+            <Label>Alasan pembatalan</Label>
+            <Input value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} placeholder="Contoh: pembeli membatalkan pesanan" />
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setCancelOrder(null)} className="flex-1 sm:flex-none">Tutup</Button>
@@ -396,7 +398,7 @@ function SimulationPage() {
               setCancelOrder(null);
               return act(() => simulationMarketplace.cancelOrder(o.id, cancelReason), `Pesanan ${o.order_number} dibatalkan.`);
             }} className="flex-1 sm:flex-none">
-              {busy ? "Memproses…" : "Konfirmasi Batal"}
+              {busy ? "Memproses…" : "Konfirmasi pembatalan"}
             </Button>
           </DialogFooter>
         </DialogContent>

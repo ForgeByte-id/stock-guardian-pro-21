@@ -58,16 +58,16 @@ function ruleStatus(r: PromoRule): RuleStatus {
 }
 
 const STATUS_UI: Record<RuleStatus, { label: string; classes: string; showToggle: boolean }> = {
-  active:   { label: "Aktif",   classes: "bg-success/15 text-success-foreground border-success/30", showToggle: true },
-  pending:  { label: "Belum Aktif", classes: "bg-warning/10 text-warning-foreground border-warning/30", showToggle: false },
-  expired:  { label: "Selesai", classes: "bg-muted text-muted-foreground border-border", showToggle: false },
-  inactive: { label: "Nonaktif", classes: "bg-muted/40 text-muted-foreground/50 border-border/50", showToggle: false },
+  active:   { label: "Aktif · sedang berlaku", classes: "bg-success/15 text-success-foreground border-success/30", showToggle: true },
+  pending:  { label: "Belum aktif · menunggu periode", classes: "bg-warning/10 text-warning-foreground border-warning/30", showToggle: false },
+  expired:  { label: "Selesai · periode berakhir", classes: "bg-muted text-muted-foreground border-border", showToggle: false },
+  inactive: { label: "Nonaktif · dimatikan", classes: "bg-muted/40 text-muted-foreground/50 border-border/50", showToggle: false },
 };
 
 function desc(conds: { product_name: string; quantity: number }[], freebies: { product_name: string; quantity: number }[]): string {
   const c = conds.map((c) => `${c.quantity}x ${c.product_name}`).join(" + ");
   const f = freebies.map((f) => `${f.quantity}x ${f.product_name}`).join(" + ");
-  return `Beli ${c} → Gratis ${f}`;
+  return `Beli ${c} → dapat gratis ${f}`;
 }
 
 function fmtDate(d: string): string {
@@ -180,14 +180,14 @@ function PromoRulesPage() {
 
   // ── Save ──
   async function saveRule() {
-    if (!formName.trim()) { toast.error("Nama promo wajib diisi"); return; }
+    if (!formName.trim()) { toast.error("Isi nama promo."); return; }
     const validConds = conditions.filter((c) => c.product_id && c.quantity > 0);
     const validFree = freebies.filter((f) => f.product_id && f.quantity > 0);
-    if (validConds.length === 0) { toast.error("Minimal 1 syarat beli"); return; }
-    if (validFree.length === 0) { toast.error("Minimal 1 barang gratis"); return; }
-    if (!startDate || !endDate) { toast.error("Periode promo wajib diisi"); return; }
+    if (validConds.length === 0) { toast.error("Tambahkan minimal satu produk yang wajib dibeli."); return; }
+    if (validFree.length === 0) { toast.error("Tambahkan minimal satu produk gratis."); return; }
+    if (!startDate || !endDate) { toast.error("Isi tanggal mulai dan selesai promo."); return; }
     if (new Date(endDate) <= new Date(startDate)) { toast.error("Tanggal selesai harus setelah tanggal mulai"); return; }
-    if (selectedChannels.length === 0) { toast.error("Minimal 1 channel dipilih"); return; }
+    if (selectedChannels.length === 0) { toast.error("Pilih minimal satu channel penjualan."); return; }
 
     setBusy(true);
     const { data: rule, error: ruleErr } = await supabase.from("promo_rules").insert({
@@ -195,7 +195,7 @@ function PromoRulesPage() {
       start_date: startDate,
       end_date: endDate,
     }).select("id").single();
-    if (ruleErr || !rule) { setBusy(false); toast.error(ruleErr?.message ?? "Gagal menyimpan"); return; }
+    if (ruleErr || !rule) { setBusy(false); toast.error(ruleErr?.message ?? "Aturan promo gagal disimpan."); return; }
 
     const inserts = [
       supabase.from("promo_rule_conditions").insert(
@@ -211,10 +211,10 @@ function PromoRulesPage() {
 
     const results = await Promise.all(inserts);
     const err = results.find((r) => r.error);
-    if (err) { toast.error(err.error?.message ?? "Gagal menyimpan detail"); setBusy(false); return; }
+    if (err) { toast.error(err.error?.message ?? "Detail aturan promo gagal disimpan."); setBusy(false); return; }
 
     setBusy(false);
-    toast.success("Aturan promo berhasil disimpan");
+    toast.success("Aturan promo berhasil disimpan.");
     resetForm();
     void load();
   }
@@ -241,9 +241,9 @@ function PromoRulesPage() {
         </PopoverTrigger>
         <PopoverContent className="w-[280px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Cari produk…" />
+            <CommandInput placeholder="Cari nama produk…" />
             <CommandList>
-              <CommandEmpty>Produk tidak ditemukan</CommandEmpty>
+              <CommandEmpty>Produk tidak ditemukan. Coba kata kunci lain.</CommandEmpty>
               <CommandGroup>
                 {products.map((p) => (
                   <CommandItem key={p.id} value={p.name} onSelect={() => { onChange(p.id); setOpenPopover(null); }}>
@@ -264,9 +264,9 @@ function PromoRulesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Aturan Promo</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Aturan promo</h1>
           <p className="text-sm text-muted-foreground">
-            prototype &middot; data simulasi &middot; {new Date().toLocaleDateString("id-ID")}
+            Data simulasi &middot; {new Date().toLocaleDateString("id-ID")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ function PromoRulesPage() {
           </span>
           <Button variant="outline" size="sm" onClick={() => setShowInactive(!showInactive)}>
             {showInactive ? <EyeOff className="mr-1.5 h-3.5 w-3.5" /> : <Eye className="mr-1.5 h-3.5 w-3.5" />}
-            {showInactive ? "Sembunyikan nonaktif" : "Tampilkan semua"}
+            {showInactive ? "Sembunyikan aturan nonaktif" : "Tampilkan semua aturan"}
           </Button>
         </div>
       </div>
@@ -284,9 +284,8 @@ function PromoRulesPage() {
       <Alert className="bg-info/10 border-info/30 text-info-foreground">
         <Info className="h-4 w-4" />
         <AlertDescription className="text-xs">
-          Promo marketplace hanya mencatat produk yang dibeli, sedangkan produk gratis tidak ikut tercatat pada order.
-          Halaman ini digunakan untuk memberitahu sistem berapa jumlah barang gratis yang benar-benar keluar
-          gudang sehingga stok tetap akurat.
+           Promo marketplace mencatat produk yang dibeli, sedangkan produk gratis tidak ikut tercatat pada pesanan.
+           Catat aturan di sini agar jumlah produk gratis yang keluar gudang ikut dihitung dalam stok.
         </AlertDescription>
       </Alert>
 
@@ -296,20 +295,20 @@ function PromoRulesPage() {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-success/10">
             <Gift className="h-4 w-4 text-success-foreground" />
           </div>
-          <CardTitle className="text-base">Buat Aturan Promo</CardTitle>
+          <CardTitle className="text-base">Buat aturan promo</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5 pt-5">
           {/* Nama Promo */}
-          <Field label="Nama Promo">
+          <Field label="Nama promo">
             <Input value={formName} onChange={(e) => setFormName(e.target.value)}
-              placeholder="Beli 1 Sabun Free 3" maxLength={200} />
+              placeholder="Contoh: Beli 1 sabun, gratis 3" maxLength={200} />
           </Field>
 
           {/* Syarat Beli */}
           <div>
             <Label className="text-sm font-medium">Syarat beli</Label>
             <p className="text-[11px] text-muted-foreground mb-2">
-              Customer wajib membeli SEMUA produk berikut (logika AND)
+              Pembeli wajib membeli semua produk berikut (logika AND)
             </p>
             <div className="space-y-2">
               {conditions.map((c, i) => (
@@ -331,7 +330,7 @@ function PromoRulesPage() {
               ))}
             </div>
             <Button variant="outline" size="sm" className="mt-2" onClick={addCondition}>
-              <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah Produk Syarat
+              <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah produk wajib dibeli
             </Button>
           </div>
 
@@ -339,7 +338,7 @@ function PromoRulesPage() {
           <div>
             <Label className="text-sm font-medium">Barang gratis</Label>
             <p className="text-[11px] text-muted-foreground mb-2">
-              Boleh berbeda produk dan boleh lebih dari satu jenis
+              Produk gratis boleh berbeda dari produk syarat dan bisa lebih dari satu jenis
             </p>
             <div className="space-y-2">
               {freebies.map((f, i) => (
@@ -361,23 +360,23 @@ function PromoRulesPage() {
               ))}
             </div>
             <Button variant="outline" size="sm" className="mt-2" onClick={addFreebie}>
-              <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah Barang Gratis
+              <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah produk gratis
             </Button>
           </div>
 
           {/* Periode */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Tanggal Mulai">
+            <Field label="Mulai berlaku">
               <Input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9" />
             </Field>
-            <Field label="Tanggal Selesai">
+            <Field label="Berakhir pada">
               <Input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9" />
             </Field>
           </div>
 
           {/* Channel */}
           <div>
-            <Label className="text-sm font-medium mb-2 block">Channel</Label>
+            <Label className="text-sm font-medium mb-2 block">Channel penjualan</Label>
             <div className="flex flex-wrap gap-3">
               {channels.map((ch) => (
                 <label key={ch.code} className="flex items-center gap-1.5 text-sm cursor-pointer">
@@ -391,16 +390,16 @@ function PromoRulesPage() {
 
           {/* Info Box */}
           <div className="rounded-lg bg-muted/30 border border-border/40 px-4 py-3 text-[11px] text-muted-foreground space-y-1">
-            <p>• Jumlah barang gratis dihitung tetap sesuai aturan promo.</p>
-            <p>• Promo bertingkat harus dibuat sebagai aturan terpisah.</p>
-            <p>• Setiap aturan memiliki periode aktif sendiri.</p>
-            <p>• Riwayat order lama tidak berubah ketika promo baru dibuat.</p>
+            <p>• Jumlah produk gratis mengikuti aturan promo.</p>
+            <p>• Promo bertingkat dibuat sebagai aturan terpisah.</p>
+            <p>• Setiap aturan punya periode berlaku sendiri.</p>
+            <p>• Riwayat pesanan lama tidak berubah saat aturan promo baru dibuat.</p>
           </div>
 
           {/* Simpan Button */}
           <div className="flex justify-end">
             <Button onClick={saveRule} disabled={busy} className="bg-success hover:bg-success/90">
-              <Save className="mr-1.5 h-4 w-4" />{busy ? "Menyimpan…" : "Simpan Aturan"}
+              <Save className="mr-1.5 h-4 w-4" />{busy ? "Menyimpan aturan…" : "Simpan aturan promo"}
             </Button>
           </div>
         </CardContent>
@@ -409,14 +408,14 @@ function PromoRulesPage() {
       {/* ═══ Card: Daftar Aturan Promo ═══ */}
       <Card>
         <CardHeader className="pb-3 border-b border-border/30">
-          <CardTitle className="text-base">Daftar Aturan Promo</CardTitle>
+          <CardTitle className="text-base">Daftar aturan promo</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {visibleRules.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
               <Gift className="mx-auto h-6 w-6 mb-2 opacity-30" />
               <p className="font-medium text-sm">Belum ada aturan promo</p>
-              <p className="text-xs mt-1">Buat aturan pertama menggunakan form di atas.</p>
+              <p className="text-xs mt-1">Buat aturan promo pertama menggunakan form di atas.</p>
             </div>
           ) : (
             <div className="divide-y divide-border/30">
@@ -441,13 +440,13 @@ function PromoRulesPage() {
                         {desc(rule.conditions, rule.freebies)}
                       </p>
                       <p className="text-[11px] text-muted-foreground/60 font-mono tabular-nums">
-                        {fmtDate(rule.start_date)} — {fmtDate(rule.end_date)}
+                        Berlaku: {fmtDate(rule.start_date)} — {fmtDate(rule.end_date)}
                       </p>
                     </div>
                     {/* Right: status + actions */}
                     <div className="flex items-center gap-2 shrink-0">
                       {ui.showToggle ? (
-                        <div className="flex items-center gap-1.5" title={rule.is_active ? "Nonaktifkan" : "Aktifkan"}>
+                        <div className="flex items-center gap-1.5" title={rule.is_active ? "Matikan aturan promo" : "Aktifkan aturan promo"}>
                           <Switch checked={rule.is_active} onCheckedChange={() => toggleActive(rule)} className="scale-90" />
                           <span className="text-xs font-medium text-success-foreground">{ui.label}</span>
                         </div>

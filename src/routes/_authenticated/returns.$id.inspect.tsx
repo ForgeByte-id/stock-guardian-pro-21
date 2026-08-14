@@ -68,22 +68,22 @@ function ReturnInspectPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Inspeksi Retur</h1>
         <p className="text-sm text-muted-foreground">
-          Order {row.order?.order_number} · {row.order?.channel?.name} · Tanggal retur {row.return_date}
+          Order {row.order?.order_number} · Channel {row.order?.channel?.name} · Retur diajukan {row.return_date}
         </p>
       </div>
 
       {row.claim_deadline && (
         <Alert variant={urgent ? "destructive" : "default"}>
           <Timer className="h-4 w-4" />
-          <AlertTitle>Klaim ke Marketplace</AlertTitle>
+          <AlertTitle>Batas klaim ke Marketplace</AlertTitle>
           <AlertDescription>
-            Batas klaim: <b>{row.claim_deadline}</b> ({daysLeft} hari lagi) — status {row.claim_status}
+            Ajukan klaim sebelum <b>{row.claim_deadline}</b> ({daysLeft} hari lagi). Status klaim: {row.claim_status}
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Item Pesanan</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Item pesanan yang dikembalikan</CardTitle></CardHeader>
         <CardContent className="text-sm space-y-1">
           {row.order?.order_items.map((it, i) => (
             <div key={i} className="flex justify-between border-b py-1">
@@ -95,28 +95,28 @@ function ReturnInspectPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Kondisi Barang Retur</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Tentukan kondisi barang retur</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <RadioGroup value={condition} onValueChange={(v) => { setCondition(v as typeof condition); setIsResalable(v === "RESALABLE"); }}>
             <div className="space-y-2">
-              <Option v="RESALABLE" title="Layak Jual"
-                desc="Barang kembali dalam kondisi baik. Stok masuk ke BATCH BARU (origin = retur) untuk memisahkan dari batch asal." />
+              <Option v="RESALABLE" title="Layak jual"
+                desc="Barang kembali dalam kondisi baik. Stok masuk ke BATCH BARU (origin = retur), bukan batch asal." />
               <Option v="DAMAGED" title="Rusak"
-                desc="Barang tidak layak jual. Stok TIDAK ditambahkan kembali." />
-              <Option v="LOST" title="Hilang di Ekspedisi"
-                desc="Barang tidak pernah kembali. Stok TIDAK ditambahkan. Untuk TikTok, deadline klaim otomatis 40 hari." />
+                desc="Barang tidak layak jual. Tidak ada pergerakan stok kedua di Stock Ledger; stok sudah terpotong saat SHIPPED." />
+              <Option v="LOST" title="Hilang di ekspedisi"
+                desc="Barang tidak kembali dari ekspedisi. Tidak ada pergerakan stok kedua di Stock Ledger; stok sudah terpotong saat SHIPPED. Untuk TikTok, batas klaim dihitung 40 hari sejak retur diajukan." />
             </div>
           </RadioGroup>
 
           <div className="space-y-1.5">
-            <Label>Catatan Inspeksi</Label>
+            <Label>Catatan inspeksi (opsional)</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
           </div>
 
           {condition === "RESALABLE" && (
             <Alert>
               <AlertDescription className="text-xs">
-                Stok masuk ke batch BARU dengan origin retur — bukan ke batch asal.
+                Stok akan masuk ke batch BARU dengan origin = retur — bukan ke batch asal.
               </AlertDescription>
             </Alert>
           )}
@@ -124,14 +124,14 @@ function ReturnInspectPage() {
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                TIDAK ada stok yang ditambahkan. Pergerakan stok sudah tercatat saat SHIPPED. {condition === "DAMAGED" ? "Klaim kerusakan" : "Klaim hilang"} tercatat di worklist klaim.
+                Tidak ada stok yang ditambahkan dan tidak ada pergerakan Stock Ledger kedua. Stok sudah terpotong saat SHIPPED. {condition === "DAMAGED" ? "Klaim kerusakan" : "Klaim hilang"} tercatat di worklist klaim.
               </AlertDescription>
             </Alert>
           )}
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => navigate({ to: "/simulation" })}>Batal</Button>
-            <Button onClick={submit} disabled={busy}>{busy ? "Menyimpan…" : "Simpan Inspeksi"}</Button>
+            <Button onClick={submit} disabled={busy}>{busy ? "Menyimpan hasil inspeksi…" : "Simpan hasil inspeksi"}</Button>
           </div>
         </CardContent>
       </Card>

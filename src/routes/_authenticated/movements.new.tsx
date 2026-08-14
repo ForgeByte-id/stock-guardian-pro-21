@@ -77,11 +77,11 @@ function MovementNewPage() {
   const selectedReason = reasons.find((r) => r.code === reasonCode);
 
   function validate() {
-    if (!productId) { toast.error("Pilih produk"); return false; }
-    if (!reasonCode) { toast.error("Pilih alasan"); return false; }
-    if (quantity < 1) { toast.error("Jumlah minimal 1"); return false; }
+    if (!productId) { toast.error("Pilih produk / SKU."); return false; }
+    if (!reasonCode) { toast.error("Pilih Reason (alasan pergerakan)."); return false; }
+    if (quantity < 1) { toast.error("Jumlah minimal 1 unit."); return false; }
     if (needsReference && !referenceNote.trim()) {
-      toast.error("Referensi wajib diisi untuk alasan ini (nama campaign/approval)");
+      toast.error("Referensi wajib diisi untuk Reason bonus, promo, atau sample (nama campaign atau catatan approval).");
       return false;
     }
     const parsed = schema.safeParse({
@@ -89,7 +89,7 @@ function MovementNewPage() {
       channel_code: channelCode === "none" ? undefined : channelCode,
       quantity, notes: notes || undefined, reference_note: referenceNote || undefined,
     });
-    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Validasi gagal"); return false; }
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Periksa kembali data pergerakan."); return false; }
     return true;
   }
 
@@ -109,46 +109,46 @@ function MovementNewPage() {
     setSubmitting(false);
     setConfirmOpen(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Pergerakan stok tercatat.");
+    toast.success("Pergerakan stok tercatat di Stock Ledger.");
     navigate({ to: "/movements" });
   }
 
   return (
     <div className="space-y-4 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Catat Pergerakan Stok</h1>
-        <p className="text-sm text-muted-foreground">Setiap perubahan stok tercatat di buku besar (append-only).</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Catat pergerakan stok</h1>
+        <p className="text-sm text-muted-foreground">Setiap perubahan stok tercatat di Stock Ledger, buku besar yang hanya bisa ditambah—bukan diubah atau dihapus.</p>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Form Input Cepat</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Form input cepat pergerakan stok</CardTitle></CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
-          <Field label="Tipe Pergerakan">
+          <Field label="Tipe pergerakan (IN / OUT)">
             <Select value={movementType} onValueChange={(v: "IN" | "OUT") => setMovementType(v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="IN">Barang Masuk</SelectItem>
-                <SelectItem value="OUT">Barang Keluar</SelectItem>
+                <SelectItem value="IN">Barang masuk (IN)</SelectItem>
+                <SelectItem value="OUT">Barang keluar (OUT)</SelectItem>
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Alasan">
+          <Field label="Reason (alasan pergerakan)">
             <Select value={reasonCode} onValueChange={(v) => { setReasonCode(v); setReferenceNote(""); }}>
-              <SelectTrigger><SelectValue placeholder="Pilih alasan" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Pilih Reason" /></SelectTrigger>
               <SelectContent>
                 {filteredReasons.map((r) => <SelectItem key={r.code} value={r.code}>{r.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Produk">
+          <Field label="Produk / SKU">
             <Select value={productId} onValueChange={setProductId}>
-              <SelectTrigger><SelectValue placeholder="Pilih produk" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Pilih produk / SKU" /></SelectTrigger>
               <SelectContent className="max-h-80">
                 {products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Kanal (opsional)">
+          <Field label="Channel (kanal, opsional)">
             <Select value={channelCode} onValueChange={setChannelCode}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -157,31 +157,31 @@ function MovementNewPage() {
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Jumlah">
+          <Field label="Jumlah unit">
             <Input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
           </Field>
           {needsReference && (
-            <Field label="Referensi (wajib)">
+            <Field label="Referensi (wajib untuk Reason ini)">
               <Input
                 value={referenceNote}
                 onChange={(e) => setReferenceNote(e.target.value)}
-                placeholder="Nama campaign / catatan approval"
+                placeholder="Nama campaign atau catatan approval"
               />
             </Field>
           )}
           <div className="md:col-span-2">
-            <Field label="Catatan (opsional)">
+            <Field label="Catatan tambahan (opsional)">
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={3} />
             </Field>
           </div>
           <div className="md:col-span-2 text-xs text-muted-foreground">
             {movementType === "OUT"
-              ? "Batch dipilih otomatis berdasarkan FEFO (kedaluwarsa terdekat)."
-              : "Untuk barang masuk, batch dibuat otomatis setelah entri disimpan."}
+              ? "Untuk OUT, Batch dipilih otomatis dengan FEFO (First Expired, First Out): Batch dengan kedaluwarsa terdekat dipakai lebih dulu."
+              : "Untuk IN, Batch dibuat otomatis setelah entri tersimpan."}
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <Button variant="outline" onClick={() => navigate({ to: "/movements" })}>Batal</Button>
-            <Button onClick={() => { if (validate()) setConfirmOpen(true); }}>Tinjau & Simpan</Button>
+            <Button onClick={() => { if (validate()) setConfirmOpen(true); }}>Tinjau lalu simpan</Button>
           </div>
         </CardContent>
       </Card>
@@ -189,15 +189,15 @@ function MovementNewPage() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Konfirmasi Pergerakan Stok</DialogTitle>
-            <DialogDescription>Setelah disimpan, entri buku besar tidak dapat diubah/dihapus.</DialogDescription>
+            <DialogTitle>Konfirmasi pergerakan stok</DialogTitle>
+            <DialogDescription>Simpan akan menambah entri ke Stock Ledger. Entri ini tidak dapat diubah atau dihapus.</DialogDescription>
           </DialogHeader>
           <div className="text-sm space-y-1">
-            <Row k="Tipe" v={movementType === "IN" ? "Barang Masuk" : "Barang Keluar"} />
-            <Row k="Alasan" v={selectedReason?.name ?? ""} />
-            <Row k="Produk" v={selectedProduct?.name ?? ""} />
-            <Row k="Jumlah" v={quantity.toLocaleString("id-ID")} />
-            <Row k="Kanal" v={channelCode === "none" ? "-" : channelCode} />
+            <Row k="Tipe (IN / OUT)" v={movementType === "IN" ? "Barang masuk (IN)" : "Barang keluar (OUT)"} />
+            <Row k="Reason" v={selectedReason?.name ?? ""} />
+            <Row k="Produk / SKU" v={selectedProduct?.name ?? ""} />
+            <Row k="Jumlah unit" v={quantity.toLocaleString("id-ID")} />
+            <Row k="Channel" v={channelCode === "none" ? "-" : channelCode} />
             {needsReference && <Row k="Referensi" v={referenceNote} />}
           </div>
           <DialogFooter>

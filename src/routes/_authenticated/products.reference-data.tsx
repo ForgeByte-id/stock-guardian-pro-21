@@ -59,13 +59,13 @@ function RefDataPage() {
 
   /* ── Channel actions ── */
   async function addChannel() {
-    if (!channelCode.trim() || !channelName.trim()) { toast.error("Kode & nama wajib diisi"); return; }
+    if (!channelCode.trim() || !channelName.trim()) { toast.error("Kode dan nama channel wajib diisi"); return; }
     const { error } = await supabase.from("channels").insert({
       code: channelCode.trim(),
       name: channelName.trim(),
     });
     if (error) { toast.error(error.message); return; }
-    toast.success("Channel berhasil ditambahkan");
+    toast.success("Channel berhasil ditambahkan.");
     setChannelModal(false);
     setChannelCode(""); setChannelName("");
     void load();
@@ -84,7 +84,7 @@ function RefDataPage() {
 
   /* ── Reason actions ── */
   async function addReason() {
-    if (!reasonCode.trim() || !reasonName.trim()) { toast.error("Kode & nama wajib diisi"); return; }
+    if (!reasonCode.trim() || !reasonName.trim()) { toast.error("Kode dan nama alasan wajib diisi"); return; }
     const { error } = await supabase.from("movement_reasons").insert({
       code: reasonCode.trim(),
       name: reasonName.trim(),
@@ -92,7 +92,7 @@ function RefDataPage() {
       is_system: false,
     });
     if (error) { toast.error(error.message); return; }
-    toast.success("Alasan berhasil ditambahkan");
+    toast.success("Alasan berhasil ditambahkan.");
     setReasonModal(false);
     setReasonCode(""); setReasonName("");
     void load();
@@ -114,36 +114,36 @@ function RefDataPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Channel &amp; Alasan</h1>
-          <p className="text-sm text-muted-foreground">Data referensi sistem. Alasan sistem tidak dapat dinonaktifkan.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Channel dan alasan pergerakan</h1>
+          <p className="text-sm text-muted-foreground">Channel dan alasan adalah data referensi untuk mencatat pergerakan stok. Alasan bawaan sistem tidak dapat dinonaktifkan.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setShowInactive(!showInactive)}>
           {showInactive ? <EyeOff className="mr-1.5 h-3.5 w-3.5" /> : <Eye className="mr-1.5 h-3.5 w-3.5" />}
-          {showInactive ? "Sembunyikan nonaktif" : "Tampilkan semua"}
+          {showInactive ? "Sembunyikan yang nonaktif" : "Tampilkan channel dan alasan nonaktif"}
         </Button>
       </div>
 
       {/* Card: Channels */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base">Channel</CardTitle>
+          <CardTitle className="text-base">Channel (asal transaksi)</CardTitle>
           <Button variant="outline" size="sm" onClick={() => setChannelModal(true)}>
-            <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah Channel
+            <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah channel
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Kode</TableHead>
-                <TableHead>Nama</TableHead>
+                <TableHead>Kode channel</TableHead>
+                <TableHead>Nama channel</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleChannels.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">Belum ada channel.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">Belum ada channel. Tambahkan channel agar transaksi bisa diberi sumber.</TableCell></TableRow>
               ) : (
                 visibleChannels.map((c) => (
                   <TableRow key={c.code} className={!c.is_active ? "opacity-40" : ""}>
@@ -157,7 +157,7 @@ function RefDataPage() {
                     </TableCell>
                     <TableCell className="py-3">
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                        title={c.is_active ? "Nonaktifkan" : "Aktifkan"}
+                        title={c.is_active ? "Nonaktifkan channel" : "Aktifkan channel"}
                         onClick={() => setConfirmTarget({ kind: "channel", code: c.code, name: c.name, active: c.is_active })}>
                         {c.is_active
                           ? <Power className="h-3.5 w-3.5" />
@@ -176,25 +176,25 @@ function RefDataPage() {
       {/* Card: Reasons */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base">Alasan Pergerakan</CardTitle>
+          <CardTitle className="text-base">Alasan pergerakan stok</CardTitle>
           <Button variant="outline" size="sm" onClick={() => setReasonModal(true)}>
-            <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah Alasan
+            <Plus className="mr-1.5 h-3.5 w-3.5" />Tambah alasan
           </Button>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Kode</TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Arah</TableHead>
-                <TableHead>Tipe</TableHead>
+                <TableHead>Kode alasan</TableHead>
+                <TableHead>Nama alasan</TableHead>
+                <TableHead>Arah stok</TableHead>
+                <TableHead>Tipe alasan</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleReasons.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Belum ada alasan.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm">Belum ada alasan pergerakan. Tambahkan alasan untuk menjelaskan setiap perubahan stok.</TableCell></TableRow>
               ) : (
                 visibleReasons.map((r) => (
                   <TableRow key={r.code} className={!r.is_active ? "opacity-40" : ""}>
@@ -205,14 +205,14 @@ function RefDataPage() {
                     </TableCell>
                     <TableCell className="py-3">
                       {r.is_system
-                        ? <Badge className="bg-info/10 text-info-foreground border-info/30 text-[11px]">Sistem</Badge>
-                        : <Badge variant="outline" className="text-[11px]">Custom</Badge>
+                        ? <Badge className="bg-info/10 text-info-foreground border-info/30 text-[11px]">Bawaan sistem</Badge>
+                        : <Badge variant="outline" className="text-[11px]">Buatan sendiri</Badge>
                       }
                     </TableCell>
                     <TableCell className="py-3">
                       {!r.is_system && (
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                          title={r.is_active ? "Nonaktifkan" : "Aktifkan"}
+                          title={r.is_active ? "Nonaktifkan alasan" : "Aktifkan alasan"}
                           onClick={() => setConfirmTarget({ kind: "reason", code: r.code, name: r.name, active: r.is_active })}>
                           {r.is_active
                             ? <Power className="h-3.5 w-3.5" />
@@ -232,13 +232,13 @@ function RefDataPage() {
       {/* ── Modal: Add Channel ── */}
       <Dialog open={channelModal} onOpenChange={setChannelModal}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Tambah Channel</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Tambah channel</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Field label="Kode">
+            <Field label="Kode channel">
               <Input value={channelCode} onChange={(e) => setChannelCode(e.target.value)}
                 placeholder="contoh: SHOPEE" className="uppercase" maxLength={20} />
             </Field>
-            <Field label="Nama">
+            <Field label="Nama channel">
               <Input value={channelName} onChange={(e) => setChannelName(e.target.value)}
                 placeholder="contoh: Shopee" maxLength={100} />
             </Field>
@@ -253,17 +253,17 @@ function RefDataPage() {
       {/* ── Modal: Add Reason ── */}
       <Dialog open={reasonModal} onOpenChange={setReasonModal}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Tambah Alasan</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Tambah alasan</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Field label="Kode">
+            <Field label="Kode alasan">
               <Input value={reasonCode} onChange={(e) => setReasonCode(e.target.value)}
                 placeholder="contoh: hadiah" maxLength={30} />
             </Field>
-            <Field label="Nama">
+            <Field label="Nama alasan">
               <Input value={reasonName} onChange={(e) => setReasonName(e.target.value)}
                 placeholder="contoh: Hadiah" maxLength={100} />
             </Field>
-            <Field label="Arah">
+            <Field label="Arah stok">
               <Select value={reasonDir} onValueChange={(v: "in" | "out") => setReasonDir(v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -285,12 +285,12 @@ function RefDataPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {confirmTarget?.active ? "Nonaktifkan" : "Aktifkan"} {confirmTarget?.kind === "channel" ? "Channel" : "Alasan"}
+              {confirmTarget?.active ? "Nonaktifkan" : "Aktifkan"} {confirmTarget?.kind === "channel" ? "channel" : "alasan"}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm">
-            {confirmTarget?.active ? "Nonaktifkan" : "Aktifkan"} <strong>{confirmTarget?.name}</strong>?
-            Data yang sudah tercatat tidak akan terpengaruh.
+            Anda yakin ingin {confirmTarget?.active ? "menonaktifkan" : "mengaktifkan"} <strong>{confirmTarget?.name}</strong>?
+            Data yang sudah tercatat tetap tersimpan dan tidak berubah.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmTarget(null)}>Batal</Button>

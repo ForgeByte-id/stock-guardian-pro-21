@@ -173,14 +173,14 @@ export function OnboardingTour({ tour, stepIndex, onNext, onPrevious, onSkip, on
           <div className="flex items-center gap-1.5">
             {stepIndex > 0 && (
               <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={onPrevious}>
-                Sebelumnya
+                Kembali
               </Button>
             )}
             <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={onSkip}>
               Lewati
             </Button>
             <Button size="sm" className="h-7 text-xs px-3" onClick={isLast ? onComplete : onNext}>
-              {isLast ? "Selesai" : "Berikutnya"}
+              {isLast ? "Selesai" : "Lanjut"}
             </Button>
           </div>
         </div>

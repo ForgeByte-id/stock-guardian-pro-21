@@ -43,15 +43,15 @@ export function UserMenu() {
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span className="text-sm">{email}</span>
-            <span className="text-xs text-muted-foreground">Admin</span>
+            <span className="text-xs text-muted-foreground">Admin · pengelola stok</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
-          <User className="mr-2 h-4 w-4" /> Profil
+          <User className="mr-2 h-4 w-4" /> Profil Admin
         </DropdownMenuItem>
         <DropdownMenuItem onClick={signOut}>
-          <LogOut className="mr-2 h-4 w-4" /> Keluar
+          <LogOut className="mr-2 h-4 w-4" /> Keluar dari akun
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

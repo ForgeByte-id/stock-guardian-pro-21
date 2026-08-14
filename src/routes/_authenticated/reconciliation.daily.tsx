@@ -37,43 +37,43 @@ function DailyReconPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Cek Konsistensi Harian</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Cek konsistensi harian</h1>
           <p className="text-sm text-muted-foreground">
-            Membandingkan saldo ringkasan dengan rekomputasi dari <code>stock_ledger</code>.
+            Bandingkan saldo ringkasan dengan perhitungan ulang dari <code>Stock Ledger</code> untuk menemukan selisih pencatatan.
           </p>
         </div>
         <Button onClick={run} disabled={busy}>
           <RefreshCw className={`mr-2 h-4 w-4 ${busy ? "animate-spin" : ""}`} />
-          Jalankan Sekarang
+          Jalankan pengecekan
         </Button>
       </div>
 
       {rows.length === 0 ? (
         <Alert>
           <CheckCircle2 className="h-4 w-4 text-success" />
-          <AlertTitle>Semua konsisten</AlertTitle>
+          <AlertTitle>Semua saldo konsisten</AlertTitle>
           <AlertDescription>
-            Tidak ada selisih antara stok tercatat dan rekomputasi buku besar. {lastRun && `Dijalankan ${lastRun.toLocaleString("id-ID")}.`}
+            Tidak ada selisih antara saldo tercatat dan hasil hitung ulang dari Stock Ledger. {lastRun && `Pengecekan: ${lastRun.toLocaleString("id-ID")}.`}
           </AlertDescription>
         </Alert>
       ) : (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>{rows.length} anomali ditemukan</AlertTitle>
-          <AlertDescription>Batch di bawah memiliki selisih. Lakukan opname untuk merekonsiliasi.</AlertDescription>
+          <AlertDescription>Batch berikut memiliki selisih. Periksa penyebabnya dan lakukan Stok Opname jika perlu.</AlertDescription>
         </Alert>
       )}
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Batch dengan Selisih</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Batch dengan selisih</CardTitle></CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Produk</TableHead>
                 <TableHead>Batch</TableHead>
-                <TableHead className="text-right">Rekomputasi Ledger</TableHead>
-                <TableHead className="text-right">Tercatat</TableHead>
+                <TableHead className="text-right">Hasil hitung Stock Ledger</TableHead>
+                <TableHead className="text-right">Saldo tercatat</TableHead>
                 <TableHead className="text-right">Selisih</TableHead>
               </TableRow>
             </TableHeader>
@@ -90,7 +90,7 @@ function DailyReconPage() {
                 </TableRow>
               ))}
               {rows.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Tidak ada anomali.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Tidak ada anomali pada pengecekan ini.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

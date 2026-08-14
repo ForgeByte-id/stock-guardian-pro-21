@@ -34,20 +34,20 @@ export function OnboardingHelpButton() {
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground"
-          aria-label="Bantuan & Tutorial">
+          aria-label="Buka bantuan dan tutorial">
           <HelpCircle className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top" className="w-64">
-        <DropdownMenuLabel>Bantuan &amp; Tutorial</DropdownMenuLabel>
+        <DropdownMenuLabel>Bantuan dan tutorial</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => { startCurrentPageTour(); setOpen(false) }}>
           <Play className="mr-2 h-4 w-4" />
-          <span>Mulai tutorial halaman ini</span>
+          <span>Pelajari halaman ini</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
-          Semua Tutorial
+          Tutorial lainnya
         </DropdownMenuLabel>
         {tours.map((t) => {
           const completed = isTourCompleted(t.id)

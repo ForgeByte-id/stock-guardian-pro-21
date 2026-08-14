@@ -12,7 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <header className="sticky top-0 z-10 h-14 flex items-center justify-between border-b bg-background/80 backdrop-blur px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <span className="font-semibold text-sm tracking-tight">Stok Akurat</span>
+              <span className="font-semibold text-sm tracking-tight">Stok Akurat · Rekonsiliasi stok</span>
             </div>
             <UserMenu />
           </header>

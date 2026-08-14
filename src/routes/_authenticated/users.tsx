@@ -24,14 +24,14 @@ function UsersPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
-        <p className="text-sm text-muted-foreground">Semua pengguna memiliki peran Admin — satu role, akses penuh.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Pengguna Admin</h1>
+        <p className="text-sm text-muted-foreground">Semua pengguna memakai satu role Admin dengan akses penuh untuk mengelola data dan stok.</p>
       </div>
       <Card>
-        <CardHeader><CardTitle className="text-base">Pengguna Terdaftar</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Pengguna terdaftar</CardTitle></CardHeader>
         <CardContent className="p-0">
           <Table>
-            <TableHeader><TableRow><TableHead>Pengguna</TableHead><TableHead>Role</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Pengguna</TableHead><TableHead>Role akses</TableHead></TableRow></TableHeader>
             <TableBody>
               {rows.map((u) => (
                 <TableRow key={u.id}>

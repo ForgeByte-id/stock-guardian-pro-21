@@ -36,17 +36,17 @@ type ReturnRow = {
 
 /* ── Helpers ── */
 const CONDITION_STYLES: Record<string, { label: string; classes: string }> = {
-  PENDING_INSPECTION: { label: "Menunggu", classes: "bg-warning/10 text-warning-foreground border-warning/30" },
-  RESALABLE:          { label: "Layak Jual", classes: "bg-success/10 text-success-foreground border-success/30" },
+  PENDING_INSPECTION: { label: "Menunggu inspeksi", classes: "bg-warning/10 text-warning-foreground border-warning/30" },
+  RESALABLE:          { label: "Layak jual", classes: "bg-success/10 text-success-foreground border-success/30" },
   DAMAGED:            { label: "Rusak", classes: "bg-destructive/10 text-destructive border-destructive/30" },
   LOST:               { label: "Hilang", classes: "bg-muted text-muted-foreground border-border" },
 };
 
 const CLAIM_STYLES: Record<string, { label: string; classes: string }> = {
-  no_claim:     { label: "Tidak perlu", classes: "bg-muted/50 text-muted-foreground" },
+  no_claim:     { label: "Tidak perlu klaim", classes: "bg-muted/50 text-muted-foreground" },
   needs_claim:  { label: "Perlu klaim", classes: "bg-warning/10 text-warning-foreground" },
-  claimed:      { label: "Diklaim", classes: "bg-info/10 text-info-foreground" },
-  settled:      { label: "Selesai", classes: "bg-success/10 text-success-foreground" },
+  claimed:      { label: "Klaim diajukan", classes: "bg-info/10 text-info-foreground" },
+  settled:      { label: "Klaim selesai", classes: "bg-success/10 text-success-foreground" },
 };
 
 function conditionStyle(cond: string) {
@@ -68,24 +68,24 @@ const LEDGER_EFFECTS = [
   {
     condition: "Layak Jual",
     icon: <RefreshCw className="h-4 w-4" />,
-    desc: "Masuk kembali ke stok lewat batch baru (origin = retur, FEFO).",
-    note: "Stok terpisah dari batch asal — jejak retur tetap jelas.",
+    desc: "Masuk kembali ke stok lewat batch baru (origin = retur); FEFO tetap berlaku.",
+    note: "Stok terpisah dari batch asal agar jejak retur tetap jelas.",
     classes: "border-success/20 bg-success/5",
     iconClasses: "text-success-foreground",
   },
   {
     condition: "Rusak",
     icon: <PackageX className="h-4 w-4" />,
-    desc: "Write-off — TIDAK menambah stok (sudah terpotong saat SHIPPED).",
-    note: "Dicatat sebagai loss di klaim kerusakan.",
+    desc: "Tidak ada pergerakan stok kedua (sudah terpotong saat SHIPPED).",
+    note: "Dicatat sebagai claim/loss record, yaitu catatan untuk menindaklanjuti klaim kerusakan.",
     classes: "border-destructive/20 bg-destructive/5",
     iconClasses: "text-destructive",
   },
   {
     condition: "Hilang",
     icon: <Trash2 className="h-4 w-4" />,
-    desc: "Loss — TIDAK menambah stok (sudah terpotong saat SHIPPED).",
-    note: "Dipisah dari rusak karena proses klaimnya beda (TikTok 40 hari).",
+    desc: "Tidak ada pergerakan stok kedua (sudah terpotong saat SHIPPED).",
+    note: "Dipisah dari rusak karena proses klaimnya berbeda (TikTok 40 hari).",
     classes: "border-border/40 bg-muted/30",
     iconClasses: "text-muted-foreground",
   },
@@ -120,7 +120,7 @@ function ReturnsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Retur</h1>
           <p className="text-sm text-muted-foreground">
-            Pengembalian pesanan dari Shopee &amp; TikTok Shop — inspeksi, klaim, dan reconcil.
+            Pengembalian pesanan dari Shopee &amp; TikTok Shop — periksa kondisi, pantau klaim, dan rekonsiliasi.
           </p>
         </div>
       </div>
@@ -135,17 +135,17 @@ function ReturnsPage() {
               <PackageSearch className="h-4 w-4 text-warning-foreground" />
             </div>
             <div>
-              <CardTitle className="text-base">Menunggu Inspeksi</CardTitle>
+              <CardTitle className="text-base">Menunggu inspeksi</CardTitle>
               <p className="text-[11px] text-muted-foreground mt-1">
                 {pending.length > 0
-                  ? `${pending.length} retur perlu diputuskan kondisinya`
+                  ? `${pending.length} retur perlu ditentukan kondisinya`
                   : "Semua retur sudah diinspeksi"}
               </p>
             </div>
           </div>
           {pending.length > 0 && (
             <Badge variant="outline" className="bg-warning/10 text-warning-foreground border-warning/30 text-xs">
-              {pending.length} menunggu
+              {pending.length} menunggu inspeksi
             </Badge>
           )}
         </CardHeader>
@@ -154,8 +154,8 @@ function ReturnsPage() {
           {pending.length === 0 ? (
             <div className="flex flex-col items-center py-10 text-muted-foreground">
               <PackageSearch className="h-8 w-8 mb-2 opacity-30" />
-              <p className="font-medium text-sm">Tidak ada retur yang menunggu inspeksi</p>
-              <p className="text-xs mt-1">Retur baru akan muncul di sini setelah pembeli mengembalikan barang.</p>
+              <p className="font-medium text-sm">Belum ada retur yang menunggu inspeksi</p>
+              <p className="text-xs mt-1">Retur baru muncul di sini setelah pembeli mengajukan pengembalian.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -163,10 +163,10 @@ function ReturnsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[240px]">Produk</TableHead>
-                    <TableHead>Ref</TableHead>
+                    <TableHead>No. order</TableHead>
                     <TableHead>Channel</TableHead>
-                    <TableHead>Tgl Diajukan</TableHead>
-                    <TableHead className="text-right w-[280px]">Aksi</TableHead>
+                    <TableHead>Tanggal retur diajukan</TableHead>
+                    <TableHead className="text-right w-[280px]">Tindakan</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -229,7 +229,7 @@ function ReturnsPage() {
                 <ScrollText className="h-3 w-3 text-muted-foreground" />
               </div>
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Efek ke stock ledger
+                Dampak pada Stock Ledger
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -253,7 +253,7 @@ function ReturnsPage() {
       {/* ════════════════════════════════════════════ */}
       <Card>
         <CardHeader className="pb-3 border-b border-border/30">
-          <CardTitle className="text-base">Riwayat Retur</CardTitle>
+          <CardTitle className="text-base">Riwayat retur yang sudah diperiksa</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -262,10 +262,10 @@ function ReturnsPage() {
                 <TableRow>
                   <TableHead>Order</TableHead>
                   <TableHead>Channel</TableHead>
-                  <TableHead>Tgl Retur</TableHead>
+                  <TableHead>Tanggal retur</TableHead>
                   <TableHead>Kondisi</TableHead>
                   <TableHead>Klaim</TableHead>
-                  <TableHead>Inspeksi</TableHead>
+                  <TableHead>Tanggal inspeksi</TableHead>
                   <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -274,8 +274,8 @@ function ReturnsPage() {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                       <PackageSearch className="mx-auto h-6 w-6 mb-2 opacity-30" />
-                      <p className="font-medium">Belum ada retur</p>
-                      <p className="text-xs mt-1">Retur muncul dari Simulasi Marketplace setelah pesanan dikirim dan pembeli mengembalikan barang.</p>
+                      <p className="font-medium">Belum ada retur tercatat</p>
+                      <p className="text-xs mt-1">Retur dari Simulasi Marketplace muncul setelah pesanan dikirim dan pembeli mengajukan pengembalian.</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -314,7 +314,7 @@ function ReturnsPage() {
         </CardContent>
         {history.length > 0 && (
           <div className="border-t border-border/40 px-5 py-3 text-xs text-muted-foreground bg-muted/10 flex justify-between">
-            <span>{history.length} retur terselesaikan</span>
+            <span>{history.length} retur selesai diproses</span>
             <span>
               {all.filter((r) => r.condition === "RESALABLE").length} layak jual
               &nbsp;·&nbsp;

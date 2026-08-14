@@ -128,19 +128,19 @@ function ProductsPage() {
   }
 
   async function saveProduct() {
-    if (!newProduct?.name) return toast.error("Nama wajib");
+    if (!newProduct?.name) return toast.error("Nama produk wajib diisi");
     const { error } = await supabase.from("products").insert({
       name: newProduct.name, sku: newProduct.sku ?? null, category: newProduct.category ?? null,
       low_stock_threshold: Number(newProduct.low_stock_threshold ?? 100),
       critical_stock_threshold: Number(newProduct.critical_stock_threshold ?? 50),
     });
     if (error) return toast.error(error.message);
-    toast.success("Produk dibuat."); setNewProduct(null); void load();
+    toast.success("Produk berhasil ditambahkan."); setNewProduct(null); void load();
   }
 
   async function saveBatch() {
     if (!newBatch?.product_id || !newBatch.batch_number || !newBatch.production_date || !newBatch.expiry_date)
-      return toast.error("Lengkapi semua kolom");
+      return toast.error("Lengkapi semua kolom batch");
     const init = Number(newBatch.initial_stock ?? 0);
     const { error } = await supabase.from("batches").insert({
       product_id: newBatch.product_id, batch_number: newBatch.batch_number,
@@ -148,7 +148,7 @@ function ProductsPage() {
       initial_stock: init, current_stock: init,
     });
     if (error) return toast.error(error.message);
-    toast.success("Batch dibuat."); setNewBatch(null); void load();
+    toast.success("Batch berhasil ditambahkan."); setNewBatch(null); void load();
   }
 
   const filtered = cards.filter(
@@ -162,17 +162,17 @@ function ProductsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Produk & Batch</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Produk dan Batch</h1>
           <p className="text-sm text-muted-foreground">
-            {cards.length} produk · {cards.reduce((s, c) => s + c.batches.length, 0)} batch aktif
+            {cards.length} produk · {cards.reduce((s, c) => s + c.batches.length, 0)} batch tercatat
           </p>
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setNewBatch({ product_id: "" })}>
-            <Plus className="mr-1.5 h-4 w-4" />Tambah Batch
+            <Plus className="mr-1.5 h-4 w-4" />Tambah batch
           </Button>
           <Button size="sm" onClick={() => setNewProduct({})}>
-            <Plus className="mr-1.5 h-4 w-4" />Produk Baru
+            <Plus className="mr-1.5 h-4 w-4" />Tambah produk
           </Button>
         </div>
       </div>
@@ -181,7 +181,7 @@ function ProductsPage() {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Cari produk, SKU, atau nomor batch…"
+          placeholder="Cari berdasarkan nama produk, SKU, atau nomor batch…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"
@@ -215,8 +215,8 @@ function ProductsPage() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <Package className="mx-auto h-10 w-10 mb-3 opacity-40" />
-          <p className="font-medium">Tidak ada produk</p>
-          <p className="text-sm mt-1">Produk aktif akan muncul di sini. Tambah produk baru lewat tombol di atas.</p>
+          <p className="font-medium">Produk tidak ditemukan</p>
+          <p className="text-sm mt-1">Produk yang cocok dengan pencarian akan muncul di sini. Tambahkan produk baru lewat tombol di atas.</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -231,7 +231,7 @@ function ProductsPage() {
                     <div className="min-w-0">
                       <h3 className="font-semibold text-base truncate">{p.name}</h3>
                       {p.sku && (
-                        <p className="text-xs text-muted-foreground font-mono mt-0.5">SKU: {p.sku}</p>
+                        <p className="text-xs text-muted-foreground font-mono mt-0.5">SKU produk: {p.sku}</p>
                       )}
                     </div>
                     <Badge variant={s.variant === "success" ? "outline" : "default"}
@@ -244,10 +244,10 @@ function ProductsPage() {
 
                   {/* Metric chips */}
                   <div className="grid grid-cols-3 gap-2 mt-3">
-                    <MetricChip label="Stok Fisik" value={p.total_stock.toLocaleString("id-ID")} />
-                    <MetricChip label="Reservasi" value={p.reserved.toLocaleString("id-ID")}
+                    <MetricChip label="Stok fisik (total)" value={p.total_stock.toLocaleString("id-ID")} />
+                    <MetricChip label="Reservasi (dipesan)" value={p.reserved.toLocaleString("id-ID")}
                       highlight={p.reserved > 0} />
-                    <MetricChip label="Aman Dijual" value={p.available.toLocaleString("id-ID")}
+                    <MetricChip label="Aman dijual" value={p.available.toLocaleString("id-ID")}
                       tone={p.available <= p.critical_stock_threshold ? "destructive" : p.available <= p.low_stock_threshold ? "warning" : "success"} />
                   </div>
                 </div>
@@ -255,17 +255,17 @@ function ProductsPage() {
                 {/* Card Body: batch table */}
                 <div className="px-5 py-3">
                   {fefo.length === 0 ? (
-                    <p className="text-xs text-muted-foreground py-4 text-center">Belum ada batch untuk produk ini.</p>
+                    <p className="text-xs text-muted-foreground py-4 text-center">Belum ada batch untuk produk ini. Tambahkan batch untuk mencatat stoknya.</p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-muted-foreground border-b border-border/40">
                             <th className="text-left font-medium py-1.5 pr-2">Batch</th>
-                            <th className="text-left font-medium py-1.5 pr-2 whitespace-nowrap">Kadaluarsa</th>
-                            <th className="text-center font-medium py-1.5 pr-2">FEFO</th>
-                            <th className="text-center font-medium py-1.5 pr-2">Jenis</th>
-                            <th className="text-right font-medium py-1.5">Sisa</th>
+                            <th className="text-left font-medium py-1.5 pr-2 whitespace-nowrap">Kedaluwarsa</th>
+                            <th className="text-center font-medium py-1.5 pr-2">FEFO (kedaluwarsa terdekat)</th>
+                            <th className="text-center font-medium py-1.5 pr-2">Asal batch</th>
+                            <th className="text-right font-medium py-1.5">Sisa stok</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -322,14 +322,14 @@ function ProductsPage() {
       {/* New Product Dialog */}
       <Dialog open={!!newProduct} onOpenChange={(o) => !o && setNewProduct(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Produk Baru</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Tambah produk</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Field label="Nama"><Input value={newProduct?.name ?? ""} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} /></Field>
-            <Field label="SKU"><Input value={newProduct?.sku ?? ""} onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })} /></Field>
-            <Field label="Kategori"><Input value={newProduct?.category ?? ""} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} /></Field>
+            <Field label="Nama produk"><Input value={newProduct?.name ?? ""} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} /></Field>
+            <Field label="SKU produk"><Input value={newProduct?.sku ?? ""} onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })} /></Field>
+            <Field label="Kategori (opsional)"><Input value={newProduct?.category ?? ""} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Threshold Peringatan"><Input type="number" value={newProduct?.low_stock_threshold ?? 100} onChange={(e) => setNewProduct({ ...newProduct, low_stock_threshold: Number(e.target.value) })} /></Field>
-              <Field label="Threshold Kritis"><Input type="number" value={newProduct?.critical_stock_threshold ?? 50} onChange={(e) => setNewProduct({ ...newProduct, critical_stock_threshold: Number(e.target.value) })} /></Field>
+              <Field label="Threshold peringatan (stok mulai rendah)"><Input type="number" value={newProduct?.low_stock_threshold ?? 100} onChange={(e) => setNewProduct({ ...newProduct, low_stock_threshold: Number(e.target.value) })} /></Field>
+              <Field label="Threshold kritis (stok sangat rendah)"><Input type="number" value={newProduct?.critical_stock_threshold ?? 50} onChange={(e) => setNewProduct({ ...newProduct, critical_stock_threshold: Number(e.target.value) })} /></Field>
             </div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setNewProduct(null)}>Batal</Button><Button onClick={saveProduct}>Simpan</Button></DialogFooter>
@@ -339,21 +339,21 @@ function ProductsPage() {
       {/* New Batch Dialog */}
       <Dialog open={!!newBatch} onOpenChange={(o) => !o && setNewBatch(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Batch Baru</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Tambah batch</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <Field label="Produk">
               <select className="w-full border rounded-md h-9 px-2 text-sm bg-background" value={newBatch?.product_id ?? ""}
                 onChange={(e) => setNewBatch({ ...newBatch, product_id: e.target.value })}>
-                <option value="">— Pilih —</option>
+                <option value="">— Pilih produk —</option>
                 {cards.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </Field>
-            <Field label="Nomor Batch"><Input value={newBatch?.batch_number ?? ""} onChange={(e) => setNewBatch({ ...newBatch, batch_number: e.target.value })} /></Field>
+            <Field label="Nomor batch"><Input value={newBatch?.batch_number ?? ""} onChange={(e) => setNewBatch({ ...newBatch, batch_number: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Tanggal Produksi"><Input type="date" value={newBatch?.production_date ?? ""} onChange={(e) => setNewBatch({ ...newBatch, production_date: e.target.value })} /></Field>
-              <Field label="Kadaluarsa"><Input type="date" value={newBatch?.expiry_date ?? ""} onChange={(e) => setNewBatch({ ...newBatch, expiry_date: e.target.value })} /></Field>
+              <Field label="Tanggal produksi"><Input type="date" value={newBatch?.production_date ?? ""} onChange={(e) => setNewBatch({ ...newBatch, production_date: e.target.value })} /></Field>
+              <Field label="Tanggal kedaluwarsa"><Input type="date" value={newBatch?.expiry_date ?? ""} onChange={(e) => setNewBatch({ ...newBatch, expiry_date: e.target.value })} /></Field>
             </div>
-            <Field label="Stok Awal"><Input type="number" value={newBatch?.initial_stock ?? 0} onChange={(e) => setNewBatch({ ...newBatch, initial_stock: Number(e.target.value) })} /></Field>
+            <Field label="Stok awal (unit)"><Input type="number" value={newBatch?.initial_stock ?? 0} onChange={(e) => setNewBatch({ ...newBatch, initial_stock: Number(e.target.value) })} /></Field>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setNewBatch(null)}>Batal</Button><Button onClick={saveBatch}>Simpan</Button></DialogFooter>
         </DialogContent>

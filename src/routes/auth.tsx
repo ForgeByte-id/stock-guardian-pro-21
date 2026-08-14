@@ -40,7 +40,7 @@ function AuthPage() {
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !password) {
-      setError("Email dan kata sandi wajib diisi.");
+       setError("Isi email dan kata sandi untuk masuk.");
       return;
     }
     setError("");
@@ -50,7 +50,7 @@ function AuthPage() {
     if (authErr) {
       const msg =
         authErr.message === "Invalid login credentials"
-          ? "Email atau kata sandi salah."
+           ? "Email atau kata sandi belum sesuai. Periksa kembali lalu coba lagi."
           : authErr.message;
       setError(msg);
       toast.error(msg);
@@ -115,12 +115,12 @@ function AuthPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-sm font-medium">Kata Sandi</Label>
+                 <Label htmlFor="password" className="text-sm font-medium">Kata sandi</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPw ? "text" : "password"}
-                    placeholder="Masukkan kata sandi"
+                     placeholder="Ketik kata sandi"
                     value={password}
                     onChange={(e) => { setPassword(e.target.value); setError(""); }}
                     autoComplete="current-password"
@@ -149,7 +149,7 @@ function AuthPage() {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Memverifikasi…
+                     Memeriksa akses…
                   </span>
                 ) : (
                   "Masuk"
@@ -159,7 +159,7 @@ function AuthPage() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-[11px] text-muted-foreground/60">Stok Akurat v2 — Sistem Rekonsiliasi Stok</p>
+         <p className="mt-6 text-center text-[11px] text-muted-foreground/60">Stok Akurat v2 — Rekonsiliasi stok</p>
       </div>
     </div>
   );

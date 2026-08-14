@@ -31,22 +31,22 @@ function ProfilePage() {
     if (!u.user) return;
     const { error } = await supabase.from("profiles").update({ display_name: displayName }).eq("id", u.user.id);
     if (error) return toast.error(error.message);
-    toast.success("Profil disimpan.");
+    toast.success("Profil berhasil disimpan.");
   }
 
   return (
     <div className="space-y-4 max-w-lg">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Profil</h1>
-        <p className="text-sm text-muted-foreground">Detail akun Anda.</p>
+        <p className="text-sm text-muted-foreground">Kelola nama yang tampil di aplikasi. Email dan role Admin tidak dapat diubah di sini.</p>
       </div>
       <Card>
-        <CardHeader><CardTitle className="text-base">Informasi Akun</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Informasi akun</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <div className="space-y-1.5"><Label>Email</Label><Input value={email} disabled /></div>
-          <div className="space-y-1.5"><Label>Nama Tampilan</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>Role</Label><Input value="Admin" disabled className="capitalize" /></div>
-          <div className="flex justify-end"><Button onClick={save}>Simpan</Button></div>
+          <div className="space-y-1.5"><Label>Email akun</Label><Input value={email} disabled /></div>
+          <div className="space-y-1.5"><Label>Nama tampilan</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} /></div>
+          <div className="space-y-1.5"><Label>Role akses</Label><Input value="Admin" disabled className="capitalize" /></div>
+          <div className="flex justify-end"><Button onClick={save}>Simpan perubahan</Button></div>
         </CardContent>
       </Card>
     </div>

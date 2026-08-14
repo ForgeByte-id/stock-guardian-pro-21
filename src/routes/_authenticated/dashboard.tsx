@@ -54,10 +54,10 @@ function daysUntil(d: string): number {
 /* ── Page ── */
 function DashboardPage() {
   const [metrics, setMetrics] = useState<Metric[]>([
-    { label: "Total SKU Aktif", value: "—", sub: "produk maklon", icon: <Boxes className="h-4 w-4" /> },
-    { label: "Batch Mendekati Exp.", value: "—", sub: "≤ 30 hari", icon: <Clock className="h-4 w-4" />, tone: "warn" },
-    { label: "Retur Menunggu Inspeksi", value: "—", sub: "perlu diputuskan", icon: <Archive className="h-4 w-4" />, tone: "warn" },
-    { label: "Anomali Terbuka", value: "—", sub: "worklist harian", icon: <ScanLine className="h-4 w-4" />, tone: "danger" },
+    { label: "Total SKU aktif", value: "—", sub: "produk maklon yang aktif", icon: <Boxes className="h-4 w-4" /> },
+    { label: "Batch mendekati kedaluwarsa", value: "—", sub: "kedaluwarsa dalam ≤ 30 hari", icon: <Clock className="h-4 w-4" />, tone: "warn" },
+    { label: "Retur menunggu inspeksi", value: "—", sub: "perlu diperiksa dan diputuskan", icon: <Archive className="h-4 w-4" />, tone: "warn" },
+    { label: "Anomali terbuka", value: "—", sub: "perlu dicek di worklist harian", icon: <ScanLine className="h-4 w-4" />, tone: "danger" },
   ]);
   const [worklist, setWorklist] = useState<WorklistItem[]>([]);
   const [recent, setRecent] = useState<RecentMovement[]>([]);
@@ -93,10 +93,10 @@ function DashboardPage() {
 
     // Set metrics
     setMetrics([
-      { label: "Total SKU Aktif", value: totalSku ?? 0, sub: "produk maklon", icon: <Boxes className="h-4 w-4" /> },
-      { label: "Batch Mendekati Exp.", value: expiring.length, sub: "≤ 30 hari", icon: <Clock className="h-4 w-4" />, tone: expiring.length > 0 ? "warn" : "default" },
-      { label: "Retur Menunggu Inspeksi", value: pendingReturns ?? 0, sub: "perlu diputuskan", icon: <Archive className="h-4 w-4" />, tone: (pendingReturns ?? 0) > 0 ? "warn" : "default" },
-      { label: "Anomali Terbuka", value: anomaliesData.length, sub: "worklist harian", icon: <ScanLine className="h-4 w-4" />, tone: anomaliesData.length > 0 ? "danger" : "default" },
+      { label: "Total SKU aktif", value: totalSku ?? 0, sub: "produk maklon yang aktif", icon: <Boxes className="h-4 w-4" /> },
+      { label: "Batch mendekati kedaluwarsa", value: expiring.length, sub: "kedaluwarsa dalam ≤ 30 hari", icon: <Clock className="h-4 w-4" />, tone: expiring.length > 0 ? "warn" : "default" },
+      { label: "Retur menunggu inspeksi", value: pendingReturns ?? 0, sub: "perlu diperiksa dan diputuskan", icon: <Archive className="h-4 w-4" />, tone: (pendingReturns ?? 0) > 0 ? "warn" : "default" },
+      { label: "Anomali terbuka", value: anomaliesData.length, sub: "perlu dicek di worklist harian", icon: <ScanLine className="h-4 w-4" />, tone: anomaliesData.length > 0 ? "danger" : "default" },
     ]);
 
     setRecent(recentData);
@@ -117,16 +117,16 @@ function DashboardPage() {
                 Klaim {c.channel_name === "TikTok Shop" ? "TikTok" : c.channel_name} {c.order_number}
               </span>
               <Badge variant="outline" className={`ml-auto text-[10px] ${c.daysLeft < 7 ? "bg-destructive/10 text-destructive border-destructive/30" : "bg-warning/15 text-warning-foreground border-warning/40"}`}>
-                {c.daysLeft <= 0 ? "LEWAT" : `${c.daysLeft} hari lagi`}
+                {c.daysLeft <= 0 ? "LEWAT" : `${c.daysLeft} hari tersisa`}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground pl-3.5">
-              retur {c.productNames}
+              Retur: {c.productNames}
               <span className="tabular-nums"> &times;{c.totalQty}</span>
             </p>
             {c.critical && (
               <p className="text-[11px] text-destructive font-medium pl-3.5 flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3" />kritis
+                <AlertTriangle className="h-3 w-3" />Kritis — segera cek
               </p>
             )}
           </div>
@@ -146,11 +146,11 @@ function DashboardPage() {
               <span className="font-medium">{e.product_name}</span>
               <span className="font-mono text-xs text-muted-foreground">batch {e.batch_number}</span>
               <Badge variant="outline" className={`ml-auto text-[10px] ${e.daysLeft < 14 ? "bg-destructive/10 text-destructive border-destructive/30" : "bg-warning/15 text-warning-foreground border-warning/40"}`}>
-                {e.daysLeft <= 0 ? "LEWAT" : `${e.daysLeft} hari lagi`}
+                {e.daysLeft <= 0 ? "LEWAT" : `${e.daysLeft} hari tersisa`}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground pl-5">
-              kedaluwarsa {e.expiry_date} &middot; sisa <span className="tabular-nums font-medium">{e.current_stock.toLocaleString("id-ID")}</span>
+              Kedaluwarsa {e.expiry_date} &middot; sisa stok <span className="tabular-nums font-medium">{e.current_stock.toLocaleString("id-ID")}</span>
             </p>
           </div>
         ),
@@ -221,7 +221,7 @@ function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard Stok</h1>
-        <p className="text-sm text-muted-foreground">Ringkasan real-time stok, kesehatan konsistensi, dan tren pergerakan.</p>
+        <p className="text-sm text-muted-foreground">Ringkasan stok real-time, hasil cek konsistensi, dan pergerakan terbaru.</p>
       </div>
 
       {/* Row 1: 4 Metric Cards */}
@@ -245,12 +245,12 @@ function DashboardPage() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
             <div>
-              <CardTitle className="text-base">Worklist Anomali Harian</CardTitle>
-              <p className="text-[11px] text-muted-foreground mt-0.5">dicek otomatis tiap pagi</p>
+              <CardTitle className="text-base">Worklist anomali harian</CardTitle>
+              <p className="text-[11px] text-muted-foreground mt-0.5">daftar yang perlu dicek; diperbarui otomatis tiap pagi</p>
             </div>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/reconciliation/daily">
-                Cek Konsistensi <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                Cek konsistensi <ArrowRight className="ml-1 h-3.5 w-3.5" />
               </Link>
             </Button>
           </CardHeader>
@@ -258,7 +258,7 @@ function DashboardPage() {
             {worklist.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <ScanLine className="mx-auto h-6 w-6 mb-2 opacity-30" />
-                <p className="text-sm font-medium">Semua bersih</p>
+                <p className="text-sm font-medium">Tidak ada yang perlu ditindaklanjuti</p>
                 <p className="text-xs mt-1">Tidak ada anomali, klaim mendesak, atau batch yang akan kedaluwarsa dalam 30 hari.</p>
               </div>
             ) : (
@@ -276,12 +276,12 @@ function DashboardPage() {
         {/* Pergerakan Terbaru */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Pergerakan Terbaru</CardTitle>
+            <CardTitle className="text-base">Pergerakan stok terbaru</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {recent.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground px-4">
-                <p className="text-sm">Belum ada pergerakan.</p>
+                <p className="text-sm">Belum ada pergerakan stok.</p>
               </div>
             ) : (
               <div className="divide-y divide-border/30">
@@ -320,7 +320,7 @@ function DashboardPage() {
             )}
             <div className="border-t border-border/30 px-4 py-2">
               <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
-                <Link to="/movements">Lihat semua &rarr;</Link>
+                <Link to="/movements">Lihat semua pergerakan &rarr;</Link>
               </Button>
             </div>
           </CardContent>

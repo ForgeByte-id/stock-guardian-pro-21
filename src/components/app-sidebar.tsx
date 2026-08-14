@@ -14,9 +14,9 @@ type Item = { title: string; url: string; icon: React.ComponentType<{ className?
 
 const GROUPS: { label: string; items: Item[] }[] = [
   {
-    label: "Ringkasan",
+    label: "Ringkasan stok",
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Dashboard stok", url: "/dashboard", icon: LayoutDashboard },
     ],
   },
   {
@@ -24,21 +24,21 @@ const GROUPS: { label: string; items: Item[] }[] = [
     items: [
       { title: "Stock Ledger", url: "/movements", icon: ClipboardList },
       { title: "Stock Opname", url: "/reconciliation/opname", icon: ClipboardCheck },
-      { title: "Input Manual", url: "/movements/new", icon: PlusCircle },
-      { title: "Cek Konsistensi", url: "/reconciliation/daily", icon: ScanLine },
-      { title: "Laporan Selisih", url: "/reconciliation/report", icon: LineChart },
+      { title: "Input stok manual", url: "/movements/new", icon: PlusCircle },
+      { title: "Cek konsistensi stok", url: "/reconciliation/daily", icon: ScanLine },
+      { title: "Laporan selisih stok", url: "/reconciliation/report", icon: LineChart },
     ],
   },
   {
     label: "Marketplace",
     items: [
       { title: "Simulasi Marketplace", url: "/simulation", icon: ShoppingCart },
-      { title: "Retur", url: "/returns", icon: Undo2 },
-      { title: "Aturan Promo", url: "/promo-rules", icon: Gift },
+      { title: "Retur barang", url: "/returns", icon: Undo2 },
+      { title: "Aturan promo", url: "/promo-rules", icon: Gift },
     ],
   },
   {
-    label: "Data",
+    label: "Data stok",
     items: [
       { title: "Produk & Batch", url: "/products", icon: PackageSearch },
       { title: "Resep Bundle", url: "/products/bundles", icon: Boxes },
@@ -46,9 +46,9 @@ const GROUPS: { label: string; items: Item[] }[] = [
     ],
   },
   {
-    label: "Akun",
+    label: "Akun & akses",
     items: [
-      { title: "Kelola Pengguna", url: "/users", icon: Users },
+      { title: "Kelola pengguna", url: "/users", icon: Users },
       { title: "Profil", url: "/profile", icon: UserCircle },
     ],
   },

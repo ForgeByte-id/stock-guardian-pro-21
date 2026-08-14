@@ -46,7 +46,7 @@ function OpnamePage() {
   }
 
   async function startSession() {
-    if (!newName.trim()) return toast.error("Isi nama sesi.");
+    if (!newName.trim()) return toast.error("Isi nama sesi Stok Opname.");
     setBusy(true);
     const { data: user } = await supabase.auth.getUser();
     const { data: session, error } = await supabase.from("opname_sessions").insert({
@@ -64,7 +64,7 @@ function OpnamePage() {
     if (rows.length) await supabase.from("opname_entries").insert(rows);
     setBusy(false); setNewName("");
     await loadSessions();
-    toast.success("Sesi opname dimulai. Isi hitungan fisik lalu terapkan koreksi.");
+    toast.success("Sesi Stok Opname dimulai. Isi jumlah fisik setiap Batch, lalu terapkan koreksi yang diperlukan.");
   }
 
   async function updatePhysical(id: string, physical: number) {
@@ -75,14 +75,14 @@ function OpnamePage() {
   async function applyOne(id: string) {
     const { error } = await supabase.rpc("apply_opname_correction", { p_entry_id: id } as never);
     if (error) return toast.error(error.message);
-    toast.success("Koreksi diterapkan.");
+    toast.success("Koreksi Stok Opname diterapkan ke Stock Ledger.");
     if (active) await loadEntries(active.id);
   }
 
   async function closeSession() {
     if (!active) return;
     await supabase.from("opname_sessions").update({ status: "COMPLETED", completed_at: new Date().toISOString() }).eq("id", active.id);
-    toast.success("Sesi opname ditutup.");
+    toast.success("Sesi Stok Opname ditutup.");
     await loadSessions();
   }
 
@@ -94,16 +94,16 @@ function OpnamePage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Stok Opname</h1>
         <p className="text-sm text-muted-foreground">
-          Bandingkan stok fisik dengan catatan sistem, lalu terapkan koreksi (menghasilkan entri ledger).
+          Hitung stok fisik per Batch, bandingkan dengan catatan sistem, lalu terapkan koreksi sebagai entri Stock Ledger baru.
         </p>
       </div>
 
       {!active && (
         <Card>
-          <CardHeader><CardTitle className="text-base">Mulai Sesi Baru</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Mulai sesi Stok Opname baru</CardTitle></CardHeader>
           <CardContent className="flex gap-2">
-            <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="mis. Opname Mingguan 13 Juli" />
-            <Button onClick={startSession} disabled={busy}><Play className="mr-2 h-4 w-4" />Mulai Opname</Button>
+            <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Contoh: Opname mingguan 13 Juli" />
+            <Button onClick={startSession} disabled={busy}><Play className="mr-2 h-4 w-4" />Mulai Stok Opname</Button>
           </CardContent>
         </Card>
       )}
@@ -112,13 +112,13 @@ function OpnamePage() {
         <Card>
           <CardHeader className="flex-row justify-between items-center space-y-0">
             <div>
-              <CardTitle className="text-base">Sesi Aktif: {active.session_name}</CardTitle>
+              <CardTitle className="text-base">Sesi aktif: {active.session_name}</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                {entries.length} batch · {withDiff.length} punya selisih · {pending} koreksi belum diterapkan
+                {entries.length} Batch diperiksa · {withDiff.length} memiliki selisih · {pending} koreksi belum diterapkan
               </p>
             </div>
             <Button variant="outline" onClick={closeSession} disabled={pending > 0}>
-              <CheckCircle2 className="mr-2 h-4 w-4" />Tutup Sesi
+              <CheckCircle2 className="mr-2 h-4 w-4" />Tutup sesi
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -126,10 +126,10 @@ function OpnamePage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Produk / Batch</TableHead>
-                  <TableHead className="text-right">Sistem</TableHead>
-                  <TableHead className="text-right w-40">Fisik</TableHead>
+                  <TableHead className="text-right">Saldo sistem</TableHead>
+                  <TableHead className="text-right w-40">Hitungan fisik</TableHead>
                   <TableHead className="text-right">Selisih</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead className="text-right">Tindakan</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -149,9 +149,9 @@ function OpnamePage() {
                     }`}>{e.discrepancy > 0 ? `+${e.discrepancy}` : e.discrepancy}</TableCell>
                     <TableCell className="text-right">
                       {e.correction_applied ? (
-                        <Badge variant="outline" className="bg-success/15 text-success-foreground border-success/40">Diterapkan</Badge>
+                        <Badge variant="outline" className="bg-success/15 text-success-foreground border-success/40">Koreksi diterapkan</Badge>
                       ) : e.discrepancy !== 0 ? (
-                        <Button size="sm" variant="outline" onClick={() => applyOne(e.id)}>Terapkan</Button>
+                        <Button size="sm" variant="outline" onClick={() => applyOne(e.id)}>Terapkan koreksi</Button>
                       ) : <span className="text-xs text-muted-foreground">-</span>}
                     </TableCell>
                   </TableRow>
@@ -163,7 +163,7 @@ function OpnamePage() {
       )}
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Riwayat Sesi</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Riwayat sesi Stok Opname</CardTitle></CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
