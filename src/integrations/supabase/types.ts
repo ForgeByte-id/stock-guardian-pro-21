@@ -792,6 +792,17 @@ export type Database = {
           recorded_stock: number
         }[]
       }
+      stock_balance_consistency_check: {
+        Args: never
+        Returns: {
+          batch_id: string
+          batch_number: string
+          diff: number
+          expected_stock: number
+          product_name: string
+          recorded_stock: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

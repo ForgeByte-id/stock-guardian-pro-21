@@ -24,7 +24,7 @@ function DailyReconPage() {
 
   const run = async () => {
     setBusy(true);
-    const { data, error } = await supabase.rpc("daily_consistency_check");
+    const { data, error } = await supabase.rpc("stock_balance_consistency_check");
     setBusy(false);
     if (error) return toast.error(error.message);
     setRows((data as unknown as Anomaly[]) ?? []);
@@ -39,7 +39,7 @@ function DailyReconPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cek Konsistensi Harian</h1>
           <p className="text-sm text-muted-foreground">
-            Membandingkan <code>batches.current_stock</code> dengan rekomputasi dari <code>stock_ledger</code>.
+            Membandingkan saldo ringkasan dengan rekomputasi dari <code>stock_ledger</code>.
           </p>
         </div>
         <Button onClick={run} disabled={busy}>

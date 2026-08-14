@@ -77,7 +77,7 @@ function DashboardPage() {
       supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", true),
       loadExpiring(),
       supabase.from("returns").select("*", { count: "exact", head: true }).eq("condition", "PENDING_INSPECTION"),
-      supabase.rpc("daily_consistency_check"),
+      supabase.rpc("stock_balance_consistency_check"),
       loadClaims(),
       supabase.from("stock_ledger")
         .select(`id, created_at, direction, quantity, notes, source_type,
