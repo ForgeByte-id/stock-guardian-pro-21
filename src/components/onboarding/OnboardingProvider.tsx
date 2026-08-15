@@ -50,6 +50,7 @@ export function OnboardingProvider({
   const startedTours = useRef<Set<string>>(new Set())
   const tourRef = useRef<TourConfig | null>(null)
   const currentUserId = useRef(userId)
+  const previousPathname = useRef(pathname)
 
   // ——— Mutex: cegah tour dimulai ulang dua kali ———
   const mutex = useRef(false)
@@ -76,6 +77,15 @@ export function OnboardingProvider({
 
   // ——— Saat route berubah, cek autoStart ———
   useEffect(() => {
+    const routeChanged = previousPathname.current !== pathname
+    if (routeChanged) {
+      previousPathname.current = pathname
+      tourRef.current = null
+      mutex.current = false
+      setActiveTour(null)
+      setActiveStepIndex(0)
+    }
+
     if (typeof window === "undefined") return
     if (!userId) return
     if (mutex.current) return
@@ -225,6 +235,7 @@ export function OnboardingProvider({
       {children}
       {visibleActiveTour && (
         <OnboardingTour
+          key={`${pathname}:${visibleActiveTour.id}`}
           tour={visibleActiveTour}
           stepIndex={activeStepIndex}
           onNext={nextStep}

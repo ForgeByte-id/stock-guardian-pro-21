@@ -25,44 +25,14 @@ export function OnboardingTour({ tour, stepIndex, onNext, onPrevious, onSkip, on
   const [targetFound, setTargetFound] = useState(true)
   const popoverRef = useRef<HTMLDivElement>(null)
   const retryCount = useRef(0)
+  const pendingTimers = useRef<number[]>([])
 
-  // ——— Cari target, retry beberapa kali ———
-  useEffect(() => {
-    if (!step) return
-    if (step.position === "center") {
-      setTargetFound(true)
-      setTargetRect(null)
-      setPopoverPos({ top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 200 })
-      return
-    }
+  const clearPendingTimers = useCallback(() => {
+    pendingTimers.current.forEach((timer) => window.clearTimeout(timer))
+    pendingTimers.current = []
+  }, [])
 
-    retryCount.current = 0
-    findTarget(step.target)
-  }, [step?.id])
-
-  function findTarget(selector: string) {
-    const el = document.querySelector(selector)
-    if (el) {
-      const rect = el.getBoundingClientRect()
-      setTargetRect(rect)
-      setTargetFound(true)
-      // scroll halus ke target
-      el.scrollIntoView({ behavior: "smooth", block: "center" })
-      // posisi popover
-      setTimeout(() => positionPopover(rect, step!.position ?? "bottom"), 400)
-      return
-    }
-    if (retryCount.current < MAX_RETRIES) {
-      retryCount.current++
-      setTimeout(() => findTarget(selector), RETRY_MS)
-    } else {
-      // target tidak ditemukan — lewati langkah
-      setTargetFound(false)
-      onNext()
-    }
-  }
-
-  function positionPopover(rect: DOMRect, pos: string) {
+  const positionPopover = useCallback((rect: DOMRect, pos: string) => {
     const pw = 360
     const ph = 220
     let top = 0, left = 0
@@ -89,7 +59,61 @@ export function OnboardingTour({ tour, stepIndex, onNext, onPrevious, onSkip, on
     top = Math.max(12, Math.min(top, window.innerHeight - ph - 12))
     left = Math.max(12, Math.min(left, window.innerWidth - pw - 12))
     setPopoverPos({ top, left })
-  }
+  }, [])
+
+  // ——— Cari target, retry beberapa kali ———
+  useEffect(() => {
+    clearPendingTimers()
+    setTargetRect(null)
+    setTargetFound(true)
+    if (!step) return
+
+    let disposed = false
+    if (step.position === "center") {
+      setTargetFound(true)
+      setTargetRect(null)
+      setPopoverPos({ top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 200 })
+      return () => {
+        disposed = true
+        clearPendingTimers()
+      }
+    }
+
+    retryCount.current = 0
+    const findTarget = (selector: string) => {
+      if (disposed) return
+
+      const el = document.querySelector(selector)
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        setTargetRect(rect)
+        setTargetFound(true)
+        // scroll halus ke target
+        el.scrollIntoView({ behavior: "smooth", block: "center" })
+        // posisi popover
+        pendingTimers.current.push(
+          window.setTimeout(() => {
+            if (!disposed) positionPopover(rect, step.position ?? "bottom")
+          }, 400),
+        )
+        return
+      }
+      if (retryCount.current < MAX_RETRIES) {
+        retryCount.current++
+        pendingTimers.current.push(window.setTimeout(() => findTarget(selector), RETRY_MS))
+      } else {
+        // target tidak ditemukan — lewati langkah
+        setTargetFound(false)
+        onNext()
+      }
+    }
+
+    findTarget(step.target)
+    return () => {
+      disposed = true
+      clearPendingTimers()
+    }
+  }, [clearPendingTimers, onNext, positionPopover, step])
 
   // ——— Keyboard ———
   useEffect(() => {

@@ -62,7 +62,9 @@ let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
 export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
   get(_, prop, receiver) {
     if (!_supabase) _supabase = createSupabaseClient();
-    return Reflect.get(_supabase, prop, receiver);
+    // Keep Supabase methods bound to the real client. Otherwise calls such as
+    // `.from()` use the proxy as `this` and cannot access internal fields.
+    const value = Reflect.get(_supabase, prop);
+    return typeof value === "function" ? value.bind(_supabase) : value;
   },
 });
-

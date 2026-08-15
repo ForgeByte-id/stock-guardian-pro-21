@@ -18,7 +18,7 @@ $$;
 -- Arrange: deterministic fixture data and authenticated admin request context.
 \ir 00_test_helpers.inc
 
-select plan(44);
+select plan(53);
 
 -- Arrange: immutable opening and fulfillment ledger history.
 reset role;
@@ -137,6 +137,34 @@ select lives_ok(
   'Arrange: fulfilled component quantities are persisted immutably'
 );
 
+-- Arrange: a second fulfilled component on the TikTok fixture order enables a
+-- mixed inspection case without introducing a new production fixture.
+reset role;
+
+insert into public.order_items (
+  id, order_id, product_id, quantity, is_bundle, external_line_reference
+) values (
+  '60000000-0000-4000-8000-000000000005',
+  '60000000-0000-4000-8000-000000000002',
+  '30000000-0000-4000-8000-000000000002',
+  1,
+  false,
+  'line-2'
+);
+
+insert into public.fulfillment_allocations (
+  id, order_item_id, component_product_id, batch_id, ledger_id, quantity,
+  created_at
+) values (
+  '71000000-0000-4000-8000-000000000003',
+  '60000000-0000-4000-8000-000000000005',
+  '30000000-0000-4000-8000-000000000002',
+  '40000000-0000-4000-8000-000000000002',
+  '70000000-0000-4000-8000-000000000004',
+  1,
+  '2026-07-03 00:00:00+00'
+);
+
 set local role authenticated;
 
 -- Returns — Arrange/Act: submit and inspect one sellable component.
@@ -160,6 +188,39 @@ select lives_ok(
     $event$::jsonb)
   $sql$,
   'Act: a partial fulfilled component can be submitted for return'
+);
+
+select is(
+  (
+    public.process_stock_event($event$
+      {
+        "idempotencyKey": "return-shopee-sellable-submit",
+        "channel": "shopee",
+        "type": "return.submitted",
+        "occurredAt": "2026-06-01T10:00:00Z",
+        "externalReference": "FIX-RETURN-SHOPEE-SELLABLE",
+        "payload": {
+          "orderId": "60000000-0000-4000-8000-000000000001",
+          "lines": [{
+            "fulfillmentAllocationId": "71000000-0000-4000-8000-000000000001",
+            "quantity": 1
+          }]
+        }
+      }
+    $event$::jsonb)->>'duplicate'
+  )::boolean,
+  true,
+  'Assert: an identical return submission is idempotent'
+);
+
+select is(
+  (
+    select count(*)::bigint
+    from public.returns
+    where external_reference = 'FIX-RETURN-SHOPEE-SELLABLE'
+  ),
+  1::bigint,
+  'Assert: duplicate return submission does not create another return case'
 );
 
 select lives_ok(
@@ -331,6 +392,131 @@ select ok(
       and rl.fulfillment_allocation_id = '71000000-0000-4000-8000-000000000001'
   $query$),
   'Assert: a rejected over-return leaves the cumulative quantity unchanged'
+);
+
+-- Returns — Arrange/Act/Assert: mixed inspection creates one inbound row for
+-- the resellable line and one claim for the damaged line, with no second
+-- movement for the damaged line.
+select lives_ok(
+  $sql$
+    select public.process_stock_event($event$
+      {
+        "idempotencyKey": "return-mixed-submit",
+        "channel": "tiktok",
+        "type": "return.submitted",
+        "occurredAt": "2026-06-06T10:00:00Z",
+        "externalReference": "FIX-RETURN-MIXED",
+        "payload": {
+          "orderId": "60000000-0000-4000-8000-000000000002",
+          "lines": [
+            {
+              "fulfillmentAllocationId": "71000000-0000-4000-8000-000000000002",
+              "quantity": 1
+            },
+            {
+              "fulfillmentAllocationId": "71000000-0000-4000-8000-000000000003",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    $event$::jsonb)
+  $sql$,
+  'Act: a return can submit multiple fulfilled component lines'
+);
+
+select lives_ok(
+  $sql$
+    select public.process_stock_event($event$
+      {
+        "idempotencyKey": "return-mixed-inspect",
+        "channel": "tiktok",
+        "type": "return.inspected",
+        "occurredAt": "2026-06-07T10:00:00Z",
+        "externalReference": "FIX-RETURN-MIXED-INSPECTION",
+        "payload": {
+          "returnReference": "FIX-RETURN-MIXED",
+          "lines": [
+            {
+              "fulfillmentAllocationId": "71000000-0000-4000-8000-000000000002",
+              "condition": "resellable"
+            },
+            {
+              "fulfillmentAllocationId": "71000000-0000-4000-8000-000000000003",
+              "condition": "damaged"
+            }
+          ]
+        }
+      }
+    $event$::jsonb)
+  $sql$,
+  'Act: mixed return lines can be inspected independently'
+);
+
+select results_eq(
+  $query$
+    select
+      rl.fulfillment_allocation_id::text,
+      rl.quantity,
+      rl.condition
+    from public.return_lines rl
+    join public.returns r on r.id = rl.return_id
+    where r.external_reference = 'FIX-RETURN-MIXED'
+    order by rl.fulfillment_allocation_id
+  $query$,
+  $query$
+    values
+      ('71000000-0000-4000-8000-000000000002'::text, 1, 'resellable'::text),
+      ('71000000-0000-4000-8000-000000000003'::text, 1, 'damaged'::text)
+  $query$,
+  'Assert: mixed inspection persists each line condition and quantity'
+);
+
+select ok(
+  pg_temp.query_true($query$
+    select count(*) = 1
+      and bool_and(b.origin = 'retur' and b.initial_stock = 0 and b.current_stock = 0)
+    from public.batches b
+    join public.stock_ledger l on l.batch_id = b.id
+    join public.returns r on r.id = l.return_id
+    where r.external_reference = 'FIX-RETURN-MIXED'
+      and l.source_type = 'return_resellable'
+  $query$),
+  'Assert: only the resellable mixed line creates a return-origin batch'
+);
+
+select ok(
+  pg_temp.query_true($query$
+    select count(*) = 1
+      and bool_and(l.quantity = 1 and l.direction = 'in')
+    from public.stock_ledger l
+    join public.returns r on r.id = l.return_id
+    where r.external_reference = 'FIX-RETURN-MIXED'
+      and l.source_type = 'return_resellable'
+  $query$),
+  'Assert: the resellable mixed line creates exactly one inbound ledger row'
+);
+
+select ok(
+  pg_temp.query_true($query$
+    select count(*) = 1
+      and bool_and(c.type = 'damaged' and c.quantity = 1)
+    from public.claim_loss_record c
+    join public.returns r on r.id = c.return_case_id
+    where r.external_reference = 'FIX-RETURN-MIXED'
+  $query$),
+  'Assert: the damaged mixed line creates one claim/loss row'
+);
+
+select is(
+  (
+    select count(*)::bigint
+    from public.stock_ledger l
+    join public.returns r on r.id = l.return_id
+    where r.external_reference = 'FIX-RETURN-MIXED'
+  ),
+  1::bigint,
+  'Assert: damaged mixed inspection creates no second ledger movement'
 );
 
 -- Returns — Arrange/Act: TikTok lost return and submission-based deadline.

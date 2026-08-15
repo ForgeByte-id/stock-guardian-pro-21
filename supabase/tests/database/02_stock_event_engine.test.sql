@@ -101,7 +101,7 @@ set local request.jwt.claim.sub = '10000000-0000-4000-8000-000000000001';
 set local request.jwt.claim.role = 'authenticated';
 set local role authenticated;
 
-select plan(79);
+select plan(83);
 
 -- Act and Assert: the frozen public event-engine contract must exist.
 select has_function(
@@ -199,6 +199,34 @@ select is(
   'Shopee SHIPPED deducts the reserved quantity'
 );
 
+select lives_ok(
+  $test$
+    insert into stock_event_test_results values (
+      'shopee.delivered',
+      public.process_stock_event('{
+        "idempotencyKey":"evt-shopee-delivered",
+        "channel":"shopee",
+        "type":"order.status_changed",
+        "occurredAt":"2026-08-04T01:03:00Z",
+        "externalReference":"EXT-SHOPEE-CUTOFF",
+        "payload":{"status":"DELIVERED"}
+      }'::jsonb)
+    )
+  $test$,
+  'Shopee DELIVERED is accepted after SHIPPED'
+);
+
+select is(
+  (
+    select count(*)::bigint
+    from public.stock_ledger ledger
+    join public.orders orders on orders.id = ledger.order_id
+    where orders.order_number = 'EXT-SHOPEE-CUTOFF'
+  ),
+  1::bigint,
+  'Shopee DELIVERED creates no additional ledger movement'
+);
+
 rollback to savepoint shopee_cutoff;
 
 -- TikTok cutoff (BR-01, FR-402–FR-404).
@@ -281,6 +309,34 @@ select is(
   ),
   2::bigint,
   'TikTok IN_TRANSIT deducts the reserved quantity'
+);
+
+select lives_ok(
+  $test$
+    insert into stock_event_test_results values (
+      'tiktok.delivered',
+      public.process_stock_event('{
+        "idempotencyKey":"evt-tiktok-delivered",
+        "channel":"tiktok",
+        "type":"order.status_changed",
+        "occurredAt":"2026-08-04T02:03:00Z",
+        "externalReference":"EXT-TIKTOK-CUTOFF",
+        "payload":{"status":"DELIVERED"}
+      }'::jsonb)
+    )
+  $test$,
+  'TikTok DELIVERED is accepted after IN_TRANSIT'
+);
+
+select is(
+  (
+    select count(*)::bigint
+    from public.stock_ledger ledger
+    join public.orders orders on orders.id = ledger.order_id
+    where orders.order_number = 'EXT-TIKTOK-CUTOFF'
+  ),
+  1::bigint,
+  'TikTok DELIVERED creates no additional ledger movement'
 );
 
 rollback to savepoint tiktok_cutoff;
@@ -961,6 +1017,28 @@ select is(
   'Rejected out-of-order event creates no ledger movement'
 );
 
+-- The stock-cutoff event cannot bypass the PROCESSING state.
+select throws_matching(
+  $test$
+    select public.process_stock_event('{
+      "idempotencyKey":"evt-ordering-direct-cutoff",
+      "channel":"shopee",
+      "type":"order.status_changed",
+      "occurredAt":"2026-08-04T10:01:30Z",
+      "externalReference":"EXT-ORDERING",
+      "payload":{"status":"SHIPPED"}
+    }'::jsonb)
+  $test$,
+  '(?i)(invalid.*transition|must enter processing)',
+  'Stock cutoff cannot bypass PROCESSING'
+);
+
+select is(
+  (select status from public.orders where order_number = 'EXT-ORDERING'),
+  'RESERVED',
+  'Direct stock cutoff rejection preserves RESERVED state'
+);
+
 -- Act: submit the valid sequence.
 select lives_ok(
   $test$
@@ -1429,7 +1507,7 @@ select is(
 -- The current migration chain is intentionally red until Task 07 provides the
 -- frozen event engine. Keep the remaining behavior plan visible but skipped so
 -- the failure identifies the missing contract instead of aborting on SQL parse.
-select * from skip(78, 'process_stock_event(jsonb) is not implemented yet');
+select * from skip(82, 'process_stock_event(jsonb) is not implemented yet');
 
 \endif
 
