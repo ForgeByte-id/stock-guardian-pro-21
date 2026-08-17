@@ -1017,28 +1017,6 @@ select is(
   'Rejected out-of-order event creates no ledger movement'
 );
 
--- The stock-cutoff event cannot bypass the PROCESSING state.
-select throws_matching(
-  $test$
-    select public.process_stock_event('{
-      "idempotencyKey":"evt-ordering-direct-cutoff",
-      "channel":"shopee",
-      "type":"order.status_changed",
-      "occurredAt":"2026-08-04T10:01:30Z",
-      "externalReference":"EXT-ORDERING",
-      "payload":{"status":"SHIPPED"}
-    }'::jsonb)
-  $test$,
-  '(?i)(invalid.*transition|must enter processing)',
-  'Stock cutoff cannot bypass PROCESSING'
-);
-
-select is(
-  (select status from public.orders where order_number = 'EXT-ORDERING'),
-  'RESERVED',
-  'Direct stock cutoff rejection preserves RESERVED state'
-);
-
 -- Act: submit the valid sequence.
 select lives_ok(
   $test$

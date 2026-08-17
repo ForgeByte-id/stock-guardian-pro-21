@@ -60,6 +60,11 @@ type ReturnRow = {
   return_lines: ReturnLine[];
 };
 
+type ActionFeedback = {
+  tone: "info" | "success" | "error";
+  message: string;
+};
+
 const CONDITION_OPTIONS: Array<{
   value: ReturnCondition;
   legacyValue: LegacyCondition;
@@ -117,6 +122,7 @@ function ReturnInspectPage() {
   const [notes, setNotes] = useState("");
   const [inspectionKey, setInspectionKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
   const submitLock = useRef(false);
 
   const load = useCallback(async () => {
@@ -182,6 +188,16 @@ function ReturnInspectPage() {
     setInspectionKey(null);
   }
 
+  function selectAllPending(lines: ReturnLine[]) {
+    setSelectedLines(Object.fromEntries(lines.map((line) => [line.id, true])));
+    setInspectionKey(null);
+  }
+
+  function clearPendingSelection() {
+    setSelectedLines({});
+    setInspectionKey(null);
+  }
+
   async function submitEventBacked(lines: ReturnLine[]) {
     if (!row?.external_reference) {
       toast.error("Retur event-backed tidak memiliki referensi event.");
@@ -198,6 +214,8 @@ function ReturnInspectPage() {
       toast.error("Tentukan kondisi untuk setiap baris yang dipilih.");
       return;
     }
+
+    setFeedback({ tone: "info", message: "Menyimpan hasil inspeksi ke Stock Ledger…" });
 
     const idempotencyKey = inspectionKey ?? createToken("return.inspected");
     setInspectionKey(idempotencyKey);
@@ -220,7 +238,14 @@ function ReturnInspectPage() {
         ? "Sebagian inspeksi tersimpan. Baris lain tetap menunggu inspeksi."
         : "Semua baris retur sudah diinspeksi.",
     );
-    navigate({ to: "/returns" });
+    setFeedback({
+      tone: "success",
+      message:
+        result.status === "pending_inspection"
+          ? "Inspeksi tersimpan. Baris lain masih menunggu inspeksi."
+          : "Semua baris retur sudah diinspeksi dan statusnya diperbarui.",
+    });
+    await load();
   }
 
   async function submitLegacy() {
@@ -231,7 +256,8 @@ function ReturnInspectPage() {
     } as never);
     if (error) throw new Error(error.message);
     toast.success("Inspeksi retur tersimpan.");
-    navigate({ to: "/returns" });
+    setFeedback({ tone: "success", message: "Inspeksi retur tersimpan." });
+    await load();
   }
 
   async function submit() {
@@ -248,7 +274,9 @@ function ReturnInspectPage() {
       if (row.return_lines.length > 0) await submitEventBacked(pendingLines);
       else await submitLegacy();
     } catch (error) {
-      toast.error((error as Error).message);
+      const message = (error as Error).message;
+      setFeedback({ tone: "error", message: `Inspeksi gagal disimpan: ${message}` });
+      toast.error(message);
     } finally {
       submitLock.current = false;
       setBusy(false);
@@ -294,6 +322,12 @@ function ReturnInspectPage() {
         </Alert>
       )}
 
+      {feedback && (
+        <Alert variant={feedback.tone === "error" ? "destructive" : "default"} role="status">
+          <AlertDescription>{feedback.message}</AlertDescription>
+        </Alert>
+      )}
+
       {eventBacked ? (
         <EventBackedInspection
           row={row}
@@ -307,6 +341,8 @@ function ReturnInspectPage() {
           onNotesChange={setNotes}
           busy={busy}
           onSubmit={submit}
+          onSelectAll={() => selectAllPending(pendingLines)}
+          onClearSelection={clearPendingSelection}
           onCancel={() => navigate({ to: "/returns" })}
         />
       ) : (
@@ -338,6 +374,8 @@ function EventBackedInspection({
   onNotesChange,
   busy,
   onSubmit,
+  onSelectAll,
+  onClearSelection,
   onCancel,
 }: {
   row: ReturnRow;
@@ -351,17 +389,36 @@ function EventBackedInspection({
   onNotesChange: (value: string) => void;
   busy: boolean;
   onSubmit: () => void;
+  onSelectAll: () => void;
+  onClearSelection: () => void;
   onCancel: () => void;
 }) {
+  const selectedPendingLines = pendingLines.filter((line) => selectedLines[line.id]);
+  const missingConditions = selectedPendingLines.filter((line) => !lineConditions[line.id]);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Tentukan kondisi per baris retur</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {pendingLines.length > 0
-            ? `${pendingLines.length} baris menunggu inspeksi${inspectedLines.length ? ` · ${inspectedLines.length} sudah selesai` : ""}. Pilih baris yang siap diproses.`
-            : "Semua baris sudah diinspeksi."}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {pendingLines.length > 0
+              ? `${pendingLines.length} baris menunggu inspeksi${inspectedLines.length ? ` · ${inspectedLines.length} sudah selesai` : ""}.`
+              : "Semua baris sudah diinspeksi."}
+          </p>
+          {pendingLines.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <Button type="button" size="sm" variant="outline" onClick={onSelectAll} disabled={busy}>
+                Pilih semua
+              </Button>
+              {selectedPendingLines.length > 0 && (
+                <Button type="button" size="sm" variant="ghost" onClick={onClearSelection} disabled={busy}>
+                  Bersihkan
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <Alert>
@@ -439,7 +496,7 @@ function EventBackedInspection({
                       : ""}
                     . Baris tidak dapat diproses ulang.
                   </p>
-                ) : selected ? (
+                ) : (
                   <RadioGroup
                     value={lineConditions[line.id] ?? ""}
                     onValueChange={(value) => onCondition(line.id, value as ReturnCondition)}
@@ -456,10 +513,6 @@ function EventBackedInspection({
                       />
                     ))}
                   </RadioGroup>
-                ) : (
-                  <p className="ml-7 mt-2 text-xs text-muted-foreground">
-                    Baris ini tetap menunggu inspeksi.
-                  </p>
                 )}
               </div>
             );
@@ -476,14 +529,22 @@ function EventBackedInspection({
           />
         </div>
 
+        <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+          {selectedPendingLines.length === 0
+            ? "Pilih minimal satu baris, lalu tentukan kondisinya."
+            : missingConditions.length > 0
+              ? `${selectedPendingLines.length} baris dipilih · tentukan kondisi untuk ${missingConditions.length} baris lagi.`
+              : `${selectedPendingLines.length} baris siap disimpan sebagai hasil inspeksi.`}
+        </div>
+
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={onCancel} disabled={busy}>
             Batal
           </Button>
           <Button
-            onClick={onSubmit}
+            onClick={() => void onSubmit()}
             disabled={
-              busy || pendingLines.length === 0 || !Object.values(selectedLines).some(Boolean)
+              busy || pendingLines.length === 0 || selectedPendingLines.length === 0 || missingConditions.length > 0
             }
           >
             {busy ? "Menyimpan hasil inspeksi…" : "Simpan hasil inspeksi"}
